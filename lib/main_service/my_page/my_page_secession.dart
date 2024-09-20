@@ -6,8 +6,8 @@ import '../../project_common/page_title_box.dart';
 import '../../user/common/user_info_input_box.dart';
 import '../../user/common/user_login_register_button.dart';
 
-class MyPageEdit extends StatelessWidget {
-  const MyPageEdit({super.key});
+class MyPageSecession extends StatelessWidget {
+  const MyPageSecession({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,22 +24,20 @@ class MyPageEdit extends StatelessWidget {
         child: Column(
           children: [
             CustomDivider(context: context, indent: 0.04),
-            PageTitleBox(pageTitle: '수정을 위해\n비밀번호를 확인해주세요!', verticalPadding: 0.2, editTitle: true),
+            PageTitleBox(pageTitle: '이용해주셔서 감사합니다.\n근데진짜나가시나요?ㅠㅠ\n한번만더생각해보시면안될까요ㅠㅠ', verticalPadding: 0.2, editTitle: true),
             Image.asset(
               'asset/img/knu_homes_logo_basic.png',
               width: MediaQuery.of(context).size.width * 0.5,
             ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.08),
             UserInfoInputBox(labelText: '비밀번호', isPassword: true),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.1),
             UserLoginRegisterButton(
-              buttonText: '다음',
+              buttonText: '탈퇴하기',
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => MyPageEditAndSecession()),
-                );
+
               },
+              isSecession: true,
             ),
           ],
         ),

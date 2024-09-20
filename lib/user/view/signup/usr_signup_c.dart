@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:knu_homes/project_common/default_frame.dart';
 import 'package:knu_homes/user/view/signup/usr_signup_d.dart';
-import '../../common/page_title_box.dart';
-import '../../common/user_input_box.dart';
+import '../../../project_common/page_title_box.dart';
+import '../../common/user_info_input_box.dart';
 import '../../common/user_login_register_button.dart';
 
 class UsrSignupC extends StatefulWidget {
@@ -34,7 +34,7 @@ class _RegisterTwoState extends State<UsrSignupC> {
                 ),
                 // 드롭다운 추가
                 SizedBox(height: MediaQuery.of(context).size.height * 0.09),
-                UserInputBox(labelText: '  아이디'),
+                UserInfoInputBox(labelText: '  아이디'),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.245),
                 UserLoginRegisterButton(
                   buttonText: '다음',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:knu_homes/const/MyColor.dart';
+import 'package:knu_homes/main_service/house_reg.dart';
 import 'package:knu_homes/main_service/my_page/my_page_main.dart';
 import 'package:knu_homes/project_common/reactSize.dart';
 import 'package:knu_homes/project_common/selector_bean/selectorBean_justshow.dart';
@@ -105,7 +106,9 @@ class _HouseListState extends ConsumerState<HouseList> {
                 padding: EdgeInsets.all(myFWidth(context, 0.03)),
                 child: GestureDetector(
                   onTap: () {
-                    print('더보기 버튼 클릭');
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => HouseReg()), // UsrLogin으로 이동
+                    );
                   },
                   child: Container(
                     decoration: BoxDecoration(

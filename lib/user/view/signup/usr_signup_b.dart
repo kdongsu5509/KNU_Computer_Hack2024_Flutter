@@ -3,7 +3,7 @@ import 'package:knu_homes/const/MyColor.dart';
 import 'package:knu_homes/project_common/default_frame.dart';
 import 'package:knu_homes/const/knu_gates.dart';
 import 'package:knu_homes/user/view/signup/usr_signup_c.dart';
-import '../../common/page_title_box.dart';
+import '../../../project_common/page_title_box.dart';
 import '../../common/user_login_register_button.dart';
 
 class UsrSignupB extends StatefulWidget {

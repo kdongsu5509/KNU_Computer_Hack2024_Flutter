@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:knu_homes/project_common/default_frame.dart';
-import '../../common/page_title_box.dart';
-import '../../common/user_input_box.dart';
+import '../../../project_common/page_title_box.dart';
+import '../../common/user_info_input_box.dart';
 import '../../common/user_login_register_button.dart';
 
 class UsrSignupD extends StatefulWidget {
@@ -31,9 +31,9 @@ class _RegisterTwoState extends State<UsrSignupD> {
                 ),
                 // 드롭다운 추가
                 SizedBox(height: MediaQuery.of(context).size.height * 0.09),
-                UserInputBox(labelText: '  비밀번호', isPassword: true),
+                UserInfoInputBox(labelText: '  비밀번호', isPassword: true),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.005),
-                UserInputBox(labelText: '  비밀번호를 한번 더 입력하세요', isPassword: true),
+                UserInfoInputBox(labelText: '  비밀번호를 한번 더 입력하세요', isPassword: true),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.15),
                 UserLoginRegisterButton(
                   buttonText: '회원가입',

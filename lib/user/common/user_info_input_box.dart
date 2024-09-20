@@ -6,11 +6,11 @@ import 'package:knu_homes/const/MyColor.dart';
  * 로그인 및 회원가입 페이지에서 사용
  */
 
-class UserInputBox extends StatelessWidget {
+class UserInfoInputBox extends StatelessWidget {
   final String labelText;
   final bool isPassword;
 
-  const UserInputBox({
+  const UserInfoInputBox({
     required this.labelText,
     this.isPassword = false, // 기본값 false 설정
     Key? key,

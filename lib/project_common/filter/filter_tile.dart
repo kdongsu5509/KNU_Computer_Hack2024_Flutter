@@ -14,7 +14,7 @@ class FilterTile extends ConsumerStatefulWidget {
     required this.filterName,
     required this.filterElements,
     required this.providerName,
-    this.isDivide = true,
+    this.isDivide = false,
     Key? key,
   }) : super(key: key);
 

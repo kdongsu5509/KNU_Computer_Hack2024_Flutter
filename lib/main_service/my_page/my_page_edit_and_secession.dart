@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:knu_homes/main_service/my_page/my_page_secession.dart';
 
 import '../../project_common/customDivider.dart';
-import '../../user/common/user_input_box.dart';
+import '../../user/common/user_info_input_box.dart';
 import '../../user/common/user_login_register_button.dart';
 
 class MyPageEditAndSecession extends StatelessWidget {
@@ -36,8 +37,8 @@ class MyPageEditAndSecession extends StatelessWidget {
                 ),
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.08),
-              UserInputBox(labelText: '이름', isPassword: true),
-              UserInputBox(labelText: '아이디', isPassword: true),
+              UserInfoInputBox(labelText: '이름', isPassword: true),
+              UserInfoInputBox(labelText: '아이디', isPassword: true),
               SizedBox(height: MediaQuery.of(context).size.height * 0.025),
               UserLoginRegisterButton(
                 buttonText: '다음',
@@ -52,10 +53,10 @@ class MyPageEditAndSecession extends StatelessWidget {
               UserLoginRegisterButton(
                 buttonText: '탈퇴하기',
                 onPressed: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => UsrSignupB()),
-                  // );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MyPageSecession()),
+                  );
                 },
                 isSecession: true,
               ),

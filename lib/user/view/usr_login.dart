@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:knu_homes/project_common/default_frame.dart';
-import 'package:knu_homes/user/common/page_title_box.dart';
-import 'package:knu_homes/user/common/user_input_box.dart';
+import 'package:knu_homes/project_common/page_title_box.dart';
+import 'package:knu_homes/user/common/user_info_input_box.dart';
 import 'package:knu_homes/user/view/signup/usr_signup_a.dart';
 import '../common/user_login_register_button.dart';
 
@@ -31,8 +31,8 @@ class UsrLogin extends StatelessWidget {
                 width: MediaQuery.of(context).size.width * 0.5,
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-              UserInputBox(labelText: '아이디'),
-              UserInputBox(labelText: '비밀번호', isPassword: true),
+              UserInfoInputBox(labelText: '아이디'),
+              UserInfoInputBox(labelText: '비밀번호', isPassword: true),
               SizedBox(height: MediaQuery.of(context).size.height * 0.14),
               UserLoginRegisterButton(
                 buttonText: '로그인',
