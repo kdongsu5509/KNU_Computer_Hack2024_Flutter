@@ -1,0 +1,361 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:knu_homes/const/MyColor.dart';
+import 'package:knu_homes/main_service/my_page/my_page_main.dart';
+import 'package:knu_homes/project_common/reactSize.dart';
+import 'package:knu_homes/project_common/selector_bean/selectorBean_justshow.dart';
+import '../project_common/house_summarize_tile.dart';
+import '../riverpod_provider/filter_provider.dart';
+import '../user/view/usr_login.dart';
+import 'house_list_component/my_drawer.dart';
+
+class HouseList extends ConsumerStatefulWidget {
+  const HouseList({super.key});
+
+  @override
+  ConsumerState<HouseList> createState() => _HouseListState();
+}
+
+class _HouseListState extends ConsumerState<HouseList> {
+  @override
+  Widget build(BuildContext context) {
+    final gateValue = ref.watch(gateProvider);
+    final maintenBillValue = ref.watch(maintenceBillProvider);
+    final windowValue = ref.watch(windowDirectionProvider);
+    final roomCntValue = ref.watch(roomCntProvider);
+    final roomFloorValue = ref.watch(roomFloorProvider);
+    final monthlyFeeStartValue = ref.watch(monthlyFeeStartValueProvider);
+    final monthlyFeeEndValue = ref.watch(monthlyFeeEndValueProvider);
+    final depositStartValue = ref.watch(depositStartValueProvider);
+    final depositEndValue = ref.watch(depositEndValueProvider);
+    final moveInDateValue = ref.watch(moveInDateProvider);
+
+    bool isFilterApplied = checkOptionValue(
+        gateValue, maintenBillValue, windowValue, roomCntValue, roomFloorValue,
+        monthlyFeeStartValue: monthlyFeeStartValue,
+        monthlyFeeEndValue: monthlyFeeEndValue,
+        depositStartValue: depositStartValue,
+        depositEndValue: depositEndValue,
+        moveInDateValue: moveInDateValue);
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: _myAppBar(context), // 커스텀 AppBar
+      drawer: MyDrawer(context: context), // 커스텀 Drawer
+      body: Stack(
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                height: myFWidth(context, 0.025),
+              ),
+              _pageTop(context: context),
+              _myDivider(context),
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: NeverScrollableScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      (isFilterApplied)
+                          ? Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          myFWidth(context, 0.06),
+                          myFWidth(context, 0.03),
+                          myFWidth(context, 0.06),
+                          0,
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: MY_DARK_GREY,
+                            borderRadius: BorderRadius.circular(
+                                myFHeight(context, 0.03)),
+                          ),
+                          child: _showCheckedOption(
+                              context: context,
+                              gateValue: gateValue,
+                              maintenBillValue: maintenBillValue,
+                              windowValue: windowValue,
+                              roomCntValue: roomCntValue,
+                              roomFloorValue: roomFloorValue,
+                              monthlyFeeStartValue: monthlyFeeStartValue,
+                              monthlyFeeEndValue: monthlyFeeEndValue,
+                              depositStartValue: depositStartValue,
+                              depositEndValue: depositEndValue,
+                              moveInDateValue: moveInDateValue),
+                        ),
+                      )
+                          : SizedBox(height: 0),
+                      houseSummarizeTile(context, true),
+                      // 목록 내용
+                      SizedBox(height: myFHeight(context, 0.1)),
+                      // 아래에 공간을 확보하여 "더보기" 버튼과 겹치지 않도록 함
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Positioned(
+              bottom: 0,
+              right: 0,
+              child: Padding(
+                padding: EdgeInsets.all(myFWidth(context, 0.03)),
+                child: GestureDetector(
+                  onTap: () {
+                    print('더보기 버튼 클릭');
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: MY_BLUE,
+                      borderRadius:
+                      BorderRadius.circular(myFHeight(context, 0.03)),
+                    ),
+                    child: Icon(
+                      Icons.add_circle_outline_rounded,
+                      color: Colors.white,
+                      size: myFHeight(context, 0.05),
+                    ),
+                  ),
+                ),
+              )),
+        ],
+      ),
+    );
+  }
+}
+
+bool checkOptionValue(int? gateValue, int? maintenBillValue, int? windowValue,
+    int? roomCntValue, int? roomFloorValue,
+    {required double monthlyFeeStartValue,
+      required double monthlyFeeEndValue,
+      required double depositStartValue,
+      required double depositEndValue,
+      required String moveInDateValue}) {
+  if (gateValue != null &&
+      maintenBillValue != null &&
+      windowValue != null &&
+      roomCntValue != null &&
+      roomFloorValue != null &&
+      monthlyFeeStartValue != 0 &&
+      monthlyFeeEndValue != 100 &&
+      depositStartValue != 0 &&
+      depositEndValue != 1000 &&
+      moveInDateValue != 'YYYY/MM/DD') {
+    return false;
+  }
+  return true;
+}
+
+PreferredSizeWidget? _myAppBar(BuildContext context) {
+  double iconSize = MediaQuery
+      .of(context)
+      .size
+      .height * 0.04;
+  return AppBar(
+    backgroundColor: Colors.white,
+    leading: Builder(
+      // Builder로 새로운 context 생성
+      builder: (context) =>
+          IconButton(
+            icon: Icon(Icons.menu, size: iconSize),
+            onPressed: () {
+              Scaffold.of(context).openDrawer(); // Drawer 열기
+            },
+          ),
+    ),
+    title: Row(
+      children: [
+        SizedBox(
+          width: myFWidth(context, 0.69),
+        ),
+        GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => MyPageMain()), // UsrLogin으로 이동
+              );
+            }, child: Icon(Icons.person_2_outlined, size: iconSize)),
+      ],
+    ),
+  );
+}
+
+Widget _pageTop({
+  required BuildContext context,
+}) {
+  return Padding(
+    padding: EdgeInsets.fromLTRB(
+      myFWidth(context, 0.06),
+      myFWidth(context, 0.015),
+      myFWidth(context, 0.06),
+      myFWidth(context, 0.045),
+    ),
+    child: Container(
+      decoration: BoxDecoration(
+        color: MY_BLUE,
+        borderRadius: BorderRadius.circular(myFHeight(context, 0.03)),
+      ),
+      height: myFHeight(context, 0.15),
+      child: Center(
+        child: Text(
+          'username님에게 \n 딱 맞는 집을 찾아보세요!',
+          style: TextStyle(
+            fontSize: myFWidth(context, 0.06),
+            fontWeight: FontWeight.w500,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _myDivider(BuildContext context) {
+  return Padding(
+    padding: EdgeInsets.symmetric(
+      horizontal: myFWidth(context, 0.06),
+    ),
+    child: Row(
+      children: [
+        Expanded(
+          child: Divider(
+            color: Colors.black,
+            thickness: myFHeight(context, 0.0035),
+            endIndent: myFWidth(context, 0.03),
+          ),
+        ),
+        SizedBox(width: myFWidth(context, 0.02)), // 간격 추가
+        Container(
+          decoration: BoxDecoration(
+            color: MY_GREY,
+            borderRadius: BorderRadius.circular(myFHeight(context, 0.03)),
+          ),
+          width: myFWidth(context, 0.25), // 적절한 크기로 조정
+          height: myFHeight(context, 0.03),
+          child: DropdownButton<String>(
+            dropdownColor: MY_GREY,
+            // 드롭다운 메뉴의 배경색 설정
+            value: '최신순',
+            alignment: Alignment.center,
+            items: [
+              DropdownMenuItem(
+                value: '최신순',
+                child: Text('최신순'),
+              ),
+              DropdownMenuItem(
+                value: '순두부',
+                child: Text('순두부'),
+              ),
+              DropdownMenuItem(
+                value: '부대찌개',
+                child: Text('부대찌개'),
+              ),
+            ],
+            onChanged: (value) {
+              // 선택한 값 처리
+            },
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+DropdownMenuItem onChanged(String? value) {
+  return DropdownMenuItem(
+    value: value,
+    child: Text(value!),
+  );
+}
+
+Widget _showCheckedOption({
+  required BuildContext context,
+  required int? gateValue,
+  required int? maintenBillValue,
+  required int? windowValue,
+  required int? roomCntValue,
+  required int? roomFloorValue,
+  required double monthlyFeeStartValue,
+  required double monthlyFeeEndValue,
+  required double depositStartValue,
+  required double depositEndValue,
+  required String moveInDateValue,
+}) {
+  List<Widget> appliedFilters = [];
+
+  if (gateValue != null) {
+    Map<int, String> gateMap = {0: '정문', 1: '북문', 2: '서문', 3: '테크노문', 4: '동문'};
+    appliedFilters.add(SelectorBeanJustShow(
+        selectorName: '문: ${gateMap[gateValue]}',
+        provider: gateProvider,
+        type: 0));
+  }
+  if (maintenBillValue != null) {
+    Map<int, String> maintenBillMap = {0: '포함', 1: '별도', 2: '기타'};
+    appliedFilters.add(SelectorBeanJustShow(
+        selectorName: '관리비: ${maintenBillMap[maintenBillValue]}',
+        provider: maintenceBillProvider,
+        type: 0));
+  }
+  if (windowValue != null) {
+    Map<int, String> windowMap = {0: '남향', 1: '동향', 2: '서향', 3: '북향'};
+    appliedFilters.add(SelectorBeanJustShow(
+        selectorName: '창문: ${windowMap[windowValue]}',
+        provider: windowDirectionProvider,
+        type: 0));
+  }
+  if (roomCntValue != null) {
+    Map<int, String> roomCntMap = {0: '원룸', 1: '투룸', 2: '쓰리룸+'};
+    appliedFilters.add(SelectorBeanJustShow(
+        selectorName: '방 개수: ${roomCntMap[roomCntValue]}',
+        provider: roomCntProvider,
+        type: 0));
+  }
+  if (roomFloorValue != null) {
+    Map<int, String> roomFloorMap = {
+      0: '1층',
+      1: '2층',
+      2: '3층',
+      3: '4층',
+      4: '5층+'
+    };
+    appliedFilters.add(SelectorBeanJustShow(
+        selectorName: '층수: ${roomFloorMap[roomFloorValue]}',
+        provider: roomFloorProvider,
+        type: 0));
+  }
+  if (monthlyFeeStartValue != 0 || monthlyFeeEndValue != 100) {
+    appliedFilters.add(SelectorBeanJustShow(
+        selectorName: '월세: ${monthlyFeeStartValue
+            .toInt()} ~ ${monthlyFeeEndValue.toInt()}',
+        provider: monthlyFeeStartValueProvider,
+        type: 1,
+        provider2: monthlyFeeEndValueProvider));
+  }
+  if (depositStartValue != 0 || depositEndValue != 1000) {
+    appliedFilters.add(SelectorBeanJustShow(
+        selectorName: '보증금: ${depositStartValue.toInt()} ~ ${depositEndValue
+            .toInt()}',
+        provider: depositStartValueProvider,
+        type: 2,
+        provider2: depositEndValueProvider));
+  }
+  if (moveInDateValue.compareTo('YYYY/MM/DD') != 0) {
+    appliedFilters.add(SelectorBeanJustShow(
+        selectorName: '입주 가능일: $moveInDateValue',
+        provider: moveInDateProvider,
+        type: 3));
+  }
+
+  return Padding(
+    padding: EdgeInsets.symmetric(horizontal: myFWidth(context, 0.04)),
+    child: Wrap(
+      spacing: myFWidth(context, 0.02),
+      runSpacing: myFHeight(context, 0.01),
+      children: appliedFilters,
+    ),
+  );
+}
+
