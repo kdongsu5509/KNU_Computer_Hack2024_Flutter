@@ -1,8 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:knu_homes/project_common/reactSize.dart';
 import '../../const/MyColor.dart';
-import '../../project_common/customDivider.dart';
+import '../../riverpod_provider/user_info_provider.dart';
 import 'chatting_list_detail.dart';
 
 class ChattingList extends ConsumerStatefulWidget {
@@ -13,44 +14,95 @@ class ChattingList extends ConsumerStatefulWidget {
 }
 
 class _HouseRegState extends ConsumerState<ChattingList> {
+  String baseUrl = 'http://kkym.duckdns.org:8080';
+
+  //토큰 넣어서 방 조회.
+  Future<List<Map<String, dynamic>>> _getChatRoomList() async {
+    try{
+      final dio = Dio();
+
+      final resp = await dio.get('$baseUrl/api/chat/rooms',
+          options: Options(headers: {
+            'Authorization': 'Bearer $MY_TOKEN',
+          }));
+
+      final data = resp.data['chatRooms'];
+      // print("data: ${resp.data}");
+      // print("data type: ${data.runtimeType}");
+      final result = List<Map<String, dynamic>>.from(data.map((chatRoom) {
+        // print("chatRoom: ${chatRoom.runtimeType}");
+        return {
+          'chatRoomId': chatRoom['chatRoomId'],
+          'title': chatRoom['title'],
+          'preview' : chatRoom['preview'],
+          'unreadCount' : chatRoom['unreadCount'],
+          'nickname' : chatRoom['nickname'],
+          'imageUrl' : chatRoom['imageUrl'],
+        };
+      }).toList());
+      print("result: ${result}");
+      return result;
+    } on DioException catch(e) {
+      print("error: $e");
+      return [];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text(
-          'Chat',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            chatSummarizeBox(context: context),
-            TextButton(
-              child: Text('채팅방으로 이동'),
-              onPressed: () {
-                // Navigator.of(context).push(
-                //   MaterialPageRoute(
-                //     builder: (context) => ChattingListDetail(
-                //       // itemId
-                //     ),
-                //   ),
-                // );
-              },
+    return FutureBuilder(
+      future: _getChatRoomList(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }else if (snapshot.hasError) {
+          return Center(child: Text(snapshot.error.toString()));
+        } else {
+          final data = snapshot.data;
+
+          return Scaffold(
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              backgroundColor: Colors.white,
+              title: Text(
+                'Chat',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
-          ],
-        ),
-      ),
+            body: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: data!.map<Widget>((chatRoomListTile) {
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChattingListDetail(
+                            chatRoomId: chatRoomListTile!['id'],
+                          ),
+                        ),
+                      );
+                    },
+                    child: chatSummarizeBox(
+                      context: context,
+                      chatRoomListTile: chatRoomListTile,
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          );
+        }
+      },
     );
   }
 }
 
 Widget chatSummarizeBox({
   required BuildContext context,
+  required Map<String, dynamic> chatRoomListTile,
   // required String title, // 차후 추가.
   // required String content,
 }) {
@@ -86,40 +138,57 @@ Widget chatSummarizeBox({
                     children: [
                       Column(
                         children: [
-                          Text(
-                            '기랸치 - 첨성기숙사',
-                            style: TextStyle(
-                              fontSize: myFWidth(context, 0.05),
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Row(
+                            children: [
+                              (chatRoomListTile['unreadCount'] != 0) ? Container(
+                                decoration: BoxDecoration(
+                                  color: MY_ORANGE,
+                                  shape: BoxShape.circle,
+                                ),
+                                width: myFWidth(context, 0.09),
+                                child: Center(
+                                  child: Text(
+                                    chatRoomListTile['unreadCount'].toString(),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: myFWidth(context, 0.035),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ) : Container(),
+                              Text(
+                                chatRoomListTile['nickname'].substring(0, 5),
+                                style: TextStyle(
+                                  fontSize: myFWidth(context, 0.05),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                'ㆍ',
+                                style: TextStyle(
+                                  fontSize: myFWidth(context, 0.05),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                (chatRoomListTile['title'].length > 6)
+                                    ? chatRoomListTile['title'].substring(0, 6)
+                                    : chatRoomListTile['title'],
+                                style: TextStyle(
+                                  fontSize: myFWidth(context, 0.05),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                           Text(
-                            '지금 거래하시면 네고해드립니다.',
+                            chatRoomListTile['preview'],
                             style: TextStyle(
                               fontSize: myFWidth(context, 0.035),
                             ),
                           ),
                         ],
-                      ),
-                      SizedBox(
-                        width: myFWidth(context, 0.05),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: MY_ORANGE,
-                          shape: BoxShape.circle,
-                        ),
-                        width: myFWidth(context, 0.09),
-                        child: Center(
-                          child: Text(
-                            '3',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: myFWidth(context, 0.035),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
                       ),
                     ],
                   ))
