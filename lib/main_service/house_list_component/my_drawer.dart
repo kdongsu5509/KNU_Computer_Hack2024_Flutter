@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:knu_homes/main_service/chatting/chatting_list.dart';
 import 'package:knu_homes/project_common/filter/filter_calendar_tile.dart';
 import 'package:knu_homes/project_common/filter/filter_range_slider_tile.dart';
 import '../../const/MyColor.dart';
@@ -39,11 +40,18 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
                   Icon(Icons.person_2_outlined, size: myFHeight(context, 0.035)),
             ),
           ),
-          _myDrawerTop(
-            context: context,
-            iconName: '채팅목록',
-            icon: Icon(Icons.messenger_outline_outlined,
-                size: myFHeight(context, 0.035)),
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => ChattingList()), // MyPage로 이동
+              );
+            },
+            child: _myDrawerTop(
+              context: context,
+              iconName: '채팅목록',
+              icon: Icon(Icons.messenger_outline_outlined,
+                  size: myFHeight(context, 0.035)),
+            ),
           ),
           Divider(
             color: Colors.black,

@@ -89,7 +89,7 @@ void postHouseDetail(
 
         if(resp2.statusCode!.toInt() >= 200 && resp2.statusCode!.toInt()< 300) {
           Navigator.of(context).pop();
-          ref.update(gateProvider.notifier)
+          //차후에 provider 삭제하는 코드 추가
         } else {
           print('매물 등록(이미지) 실패: ${resp2.data}');
         }
