@@ -4,29 +4,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:knu_homes/project_common/filter/filter_single_slider_tile.dart';
 import 'package:knu_homes/project_common/reactSize.dart';
-import 'package:knu_homes/riverpod_provider/filter_provider.dart';
-import 'package:knu_homes/user/common/user_login_register_button.dart';
 import 'package:knu_homes/user/common/user_text_input_box.dart';
 import '../project_common/customDivider.dart';
 import '../project_common/filter/filter_calendar_tile.dart';
 import '../project_common/filter/filter_tile.dart';
-import '../project_common/filter/filter_title.dart';
 
-class HouseReg extends ConsumerStatefulWidget {
-  const HouseReg({super.key});
+class HouseDetail extends ConsumerStatefulWidget {
+  const HouseDetail({super.key});
 
   @override
-  ConsumerState<HouseReg> createState() => _HouseRegState();
+  ConsumerState<HouseDetail> createState() => _HouseRegState();
 }
 
-class _HouseRegState extends ConsumerState<HouseReg> {
+class _HouseRegState extends ConsumerState<HouseDetail> {
   List<File> _imageList = [];
 
   @override
   Widget build(BuildContext context) {
-
-    final isAgree = ref.watch(isAgreeProvider);
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -44,7 +38,7 @@ class _HouseRegState extends ConsumerState<HouseReg> {
               UserTextInputBox(hintText: ' 제목을 입력하세요'),
               UserTextInputBox(
                   hintText:
-                      ' 홈즈에 올릴 게시글 내용을 작성해주세요.\n 신뢰할 수 있는 거래를 위해 자세히 적어주세요\n',
+                  ' 홈즈에 올릴 게시글 내용을 작성해주세요.\n 신뢰할 수 있는 거래를 위해 자세히 적어주세요\n',
                   isNeedLong: true),
               UserTextInputBox(hintText: ' 매물 이름을 입력하세요'),
               UserTextInputBox(hintText: ' 매물 주소를 입력하세요'),
@@ -131,29 +125,6 @@ class _HouseRegState extends ConsumerState<HouseReg> {
               ),
               FilterCalendarTile(filterName: '입주 가능 날짜'),
               FilterCalendarTile(filterName: '계약 만료 날짜'),
-              Row(
-                children: [
-                  Checkbox(
-                    activeColor: Colors.black,
-                    checkColor: Colors.white,
-                    value: isAgree,
-                    onChanged: (bool? newValue) {
-                      if (newValue != null) {
-                        // 새로운 상태를 반환하는 함수 형태로 전달
-                        ref
-                            .read(isAgreeProvider.notifier)
-                            .update((state) => newValue);
-                        print(
-                            'finishContainValue: ${!isAgree}'); // 선택 시 false, 선택 해제 시 true
-                      }
-                    },
-                  ),
-                  FilterTitle(filterName: '이 모든 항목은 서류상 집주인과 합의되었으며\n이후 발생하는 모든 문제는 홈즈에서 책임지지 \n않음을 동의합니다.', fontSize: 0.03),
-                ],
-              ),
-              SizedBox(height: myFWidth(context, 0.04)),
-              UserLoginRegisterButton(buttonText: '등록하기', onPressed: (){}),
-              SizedBox(height: myFWidth(context, 0.04)),
             ],
           ),
         ),
@@ -164,7 +135,7 @@ class _HouseRegState extends ConsumerState<HouseReg> {
   Future<void> _pickImages() async {
     final picker = ImagePicker();
     final List<XFile>? pickedImages =
-        await picker.pickMultiImage(); // 다중 이미지 선택
+    await picker.pickMultiImage(); // 다중 이미지 선택
     if (pickedImages != null) {
       setState(() {
         _imageList = pickedImages

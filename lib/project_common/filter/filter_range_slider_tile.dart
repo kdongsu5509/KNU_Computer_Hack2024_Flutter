@@ -5,19 +5,19 @@ import 'package:knu_homes/project_common/reactSize.dart';
 import 'package:knu_homes/riverpod_provider/filter_provider.dart';
 import 'filter_title.dart';
 
-class Filterslidertile extends ConsumerStatefulWidget {
+class FiltersRangelSidertile extends ConsumerStatefulWidget {
   final String filterName;
 
-  const Filterslidertile({
+  const FiltersRangelSidertile({
     required this.filterName,
     Key? key,
   }) : super(key: key);
 
   @override
-  ConsumerState<Filterslidertile> createState() => _FiltertileState();
+  ConsumerState<FiltersRangelSidertile> createState() => _FiltertileState();
 }
 
-class _FiltertileState extends ConsumerState<Filterslidertile> {
+class _FiltertileState extends ConsumerState<FiltersRangelSidertile> {
   @override
   Widget build(BuildContext context) {
     final MontlyFeeStartValue = ref.watch(monthlyFeeStartValueProvider);

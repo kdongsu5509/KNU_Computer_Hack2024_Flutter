@@ -15,6 +15,7 @@ class FilterTitle extends ConsumerStatefulWidget {
   final double fontSize; // 폰트 크기
   final bool isLonely; // 패딩 여부
   final bool isNeedValueShow; // 값 표시 여부
+  final bool isNeedSingleValueShow; // 단일 값 표시 여부
   var startValue;
   var endValue;
 
@@ -23,6 +24,7 @@ class FilterTitle extends ConsumerStatefulWidget {
     this.fontSize = 0.042,
     this.isLonely = false,
     this.isNeedValueShow = false,
+    this.isNeedSingleValueShow = false,
     this.startValue,
     this.endValue,
     Key? key,
@@ -49,8 +51,24 @@ class _FilterTitleState extends ConsumerState<FilterTitle> {
         ),
       );
     } else {
-      // 값 표시가 필요한 경우
-      returnedWidget = Row(
+      if(widget.isNeedSingleValueShow){
+        returnedWidget = Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              widget.filterName,
+              style: TextStyle(fontSize: myFWidth(context, widget.fontSize,), fontWeight: FontWeight.bold),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                _valueContainer(widget.startValue.toInt().toString()),
+              ],
+            ),
+          ],
+        );
+      }
+      else returnedWidget = Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
@@ -74,7 +92,6 @@ class _FilterTitleState extends ConsumerState<FilterTitle> {
         ],
       );
     }
-
     return returnedWidget;
   }
 
@@ -91,7 +108,6 @@ class _FilterTitleState extends ConsumerState<FilterTitle> {
       child: Text(
         value,
         textAlign: TextAlign.center,
-
       ),
     );
   }

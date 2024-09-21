@@ -22,7 +22,12 @@ class FilterCalendarTile extends ConsumerStatefulWidget {
 class _FiltertileState extends ConsumerState<FilterCalendarTile> {
   @override
   Widget build(BuildContext context) {
-    final moveInDateValue = ref.watch(moveInDateProvider);
+
+    final _usingProvider = (widget.filterName == '입주 가능 날짜')
+        ? moveInDateProvider
+        : moveOutDateProvider;
+
+    final _usingValue = ref.watch(_usingProvider);
 
     return ListTile(
       title: FilterTitle(
@@ -42,7 +47,7 @@ class _FiltertileState extends ConsumerState<FilterCalendarTile> {
                 ),
               ),
               child: Text(
-                moveInDateValue,
+                _usingValue,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: MY_DARK_GREY,
@@ -61,7 +66,7 @@ class _FiltertileState extends ConsumerState<FilterCalendarTile> {
                 lastDate: DateTime(DateTime.now().year + 1),
               ).then((value) {
                 if (value != null) {
-                  ref.read(moveInDateProvider.notifier).update((state) =>
+                  ref.read(_usingProvider.notifier).update((state) =>
                         DateFormat('yyyy-MM-dd').format(value).toString(),
                       );
                 }
@@ -78,8 +83,4 @@ class _FiltertileState extends ConsumerState<FilterCalendarTile> {
       onTap: null,
     );
   }
-}
-
-RangeValues _toInt(double value1, double value2) {
-  return RangeValues(value1.roundToDouble(), value2.roundToDouble());
 }

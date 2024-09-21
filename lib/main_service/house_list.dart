@@ -7,7 +7,6 @@ import 'package:knu_homes/project_common/reactSize.dart';
 import 'package:knu_homes/project_common/selector_bean/selectorBean_justshow.dart';
 import '../project_common/house_summarize_tile.dart';
 import '../riverpod_provider/filter_provider.dart';
-import '../user/view/usr_login.dart';
 import 'house_list_component/my_drawer.dart';
 
 class HouseList extends ConsumerStatefulWidget {

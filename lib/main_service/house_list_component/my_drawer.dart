@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:knu_homes/project_common/filter/filter_calendar_tile.dart';
-import 'package:knu_homes/project_common/filter/filter_slider_tile.dart';
+import 'package:knu_homes/project_common/filter/filter_range_slider_tile.dart';
 import '../../const/MyColor.dart';
 import '../../project_common/filter/filter_tile.dart';
 import '../../project_common/reactSize.dart';
@@ -114,10 +114,10 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
             providerName: 'roomFloorProvider',
             isDivide: true,
           ),
-          Filterslidertile(
+          FiltersRangelSidertile(
             filterName: '월세',
           ),
-          Filterslidertile(
+          FiltersRangelSidertile(
             filterName: '보증금',
           ),
           FilterCalendarTile(filterName: '입주 가능 날짜'),
