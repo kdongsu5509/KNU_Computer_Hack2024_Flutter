@@ -33,11 +33,13 @@ class _HouseRegState extends ConsumerState<ChattingList> {
             TextButton(
               child: Text('채팅방으로 이동'),
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => ChattingListDetail(),
-                  ),
-                );
+                // Navigator.of(context).push(
+                //   MaterialPageRoute(
+                //     builder: (context) => ChattingListDetail(
+                //       // itemId
+                //     ),
+                //   ),
+                // );
               },
             ),
           ],

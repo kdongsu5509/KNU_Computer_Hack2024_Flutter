@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,6 +8,7 @@ import 'package:knu_homes/project_common/reactSize.dart';
 
 import '../project_common/customDivider.dart';
 import '../request/houser_list_request.dart';
+import '../riverpod_provider/user_info_provider.dart';
 
 class HouseDetail extends ConsumerStatefulWidget {
   final int houseId;
@@ -83,14 +85,39 @@ class _HouseRegState extends ConsumerState<HouseDetail> {
                     ),
                     Text('주소: ${detailInfo['address'] ?? ''}'), // 주소
                     TextButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
+                      onPressed: () async {
+                        try{
+                          final dio = Dio();
+                          late final chatRoomId;
+
+                          final resp = await dio.post(
+                            baseUrl + '/api/chat/rooms',
+                              data :{
+                                'itemId' : widget.houseId,
+                              },//채팅방 id 조회
+                              options: Options(
+                                  headers: {
+                                    'Authorization' : 'Bearer $MY_TOKEN',
+                                  }
+                              )
+                          );
+
+                          chatRoomId = resp.data['chatRoomId'].toInt(); //채팅방 id
+
+                          Navigator.of(context).push(
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    ChattingListDetail()));
+                              builder: (context) => ChattingListDetail(
+                                chatRoomId: chatRoomId,
+                              ),
+                            ),
+                          );
+
+                        } on DioException catch (e) {
+                          print('오류 발생: ${e.response}');
+                        }
                       },
                       child: Text('채팅하기'),
-                    )
+                    ),
                   ],
                 );
               } else {
