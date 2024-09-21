@@ -1,6 +1,7 @@
 import 'dart:convert';
-
+import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:knu_homes/riverpod_provider/filter_provider.dart';
 import 'package:knu_homes/riverpod_provider/house_reg_provider.dart';
 
 final dio = Dio();
@@ -18,6 +19,7 @@ void postHouseDetail(
   int deposit,
   String moveIn,
   String moveOut,
+  BuildContext context,
 ) async {
   final request = ItemEnrollRequest(
     title: houseRegState.title,
@@ -33,7 +35,9 @@ void postHouseDetail(
     roomCount: roomCnt,
     windowDirection: windowDirection,
     images: houseRegState.imageList.map((image) {
-      return MultipartFile.fromFileSync(image.path, filename: image.path.split('/').last, contentType: DioMediaType.parse('image/jpeg'));
+      return MultipartFile.fromFileSync(image.path,
+          filename: image.path.split('/').last,
+          contentType: DioMediaType.parse('image/jpeg'));
     }).toList(),
   );
 
@@ -44,10 +48,7 @@ void postHouseDetail(
     // final data = FormData.fromMap(request.toMap());
     final resp = await dio.post(
       '$baseUrl/api/items',
-      data: FormData.fromMap({
-        'itemEnrollRequest': jsonEncode(request.item()),
-        'images': null,
-      }),
+      data: request.item(),
       options: Options(
         headers: {
           'Authorization': 'Bearer $my_token', // 토큰 추가
@@ -56,27 +57,47 @@ void postHouseDetail(
       ),
     );
 
-    final resp2 = await dio.post(
-      '$baseUrl/api/items',
-      data: FormData.fromMap({
-        'images': request.images,
-      }),
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $my_token', // 토큰 추가
-        },
-        contentType: 'multipart/form-data',
-      ),
-    );
+    // final resp2 = await dio.post(
+    //   '$baseUrl/api/items',
+    //   data: FormData.fromMap({
+    //     'images': request.images,
+    //   }),
+    //   options: Options(
+    //     headers: {
+    //       'Authorization': 'Bearer $my_token', // 토큰 추가
+    //     },
+    //     contentType: 'multipart/form-data',
+    //   ),
+    // );
 
-    if (resp.statusCode == 201 && resp2.statusCode == 201) {
+    if (resp.statusCode == 201) {
       print('매물 등록 성공: ${resp.data}');
-    } else {
-      if(resp.statusCode != 201) {
-        print('매물 등록(json) 실패: ${resp.data}');
-      }else if(resp2.statusCode != 201){
-        print('매물 등록(이미지) 실패: ${resp2.data}');
+
+      try {
+        final resp2 = await dio.post(
+          '$baseUrl/api/items/${resp.data['id']}/images',
+          data: FormData.fromMap({
+            'images': request.images,
+          }),
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $my_token', // 토큰 추가
+            },
+            contentType: 'multipart/form-data',
+          ),
+        );
+
+        if(resp2.statusCode!.toInt() >= 200 && resp2.statusCode!.toInt()< 300) {
+          Navigator.of(context).pop();
+          ref.update(gateProvider.notifier)
+        } else {
+          print('매물 등록(이미지) 실패: ${resp2.data}');
+        }
+      } on DioException catch (e) {
+        print('오류 발생: ${e.response}');
       }
+    } else {
+      print('매물 등록(이미지) 실패: ${resp.data}');
     }
   } on DioException catch (e) {
     print('오류 발생: ${e.response}');

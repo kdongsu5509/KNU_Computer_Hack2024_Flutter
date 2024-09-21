@@ -8,6 +8,7 @@ import 'package:knu_homes/project_common/filter/filter_single_slider_tile.dart';
 import 'package:knu_homes/project_common/reactSize.dart';
 import 'package:knu_homes/user/common/user_login_register_button.dart';
 import 'package:knu_homes/user/common/user_text_input_box.dart';
+import '../../project_common/customDivider.dart';
 import '../project_common/customDivider.dart';
 import '../project_common/filter/filter_calendar_tile.dart';
 import '../project_common/filter/filter_tile.dart';
@@ -17,14 +18,14 @@ import '../riverpod_provider/filter_provider.dart';
 import '../riverpod_provider/house_reg_provider.dart';
 import '../riverpod_provider/user_info_provider.dart';
 
-class HouseReg extends ConsumerStatefulWidget {
-  const HouseReg({super.key});
+class ChattingList extends ConsumerStatefulWidget {
+  const ChattingList({super.key});
 
   @override
-  ConsumerState<HouseReg> createState() => _HouseRegState();
+  ConsumerState<ChattingList> createState() => _HouseRegState();
 }
 
-class _HouseRegState extends ConsumerState<HouseReg> {
+class _HouseRegState extends ConsumerState<ChattingList> {
   TextEditingController titleController = TextEditingController();
   TextEditingController detailInfoController = TextEditingController();
   TextEditingController buildingNameController = TextEditingController();
@@ -50,33 +51,6 @@ class _HouseRegState extends ConsumerState<HouseReg> {
 
   @override
   Widget build(BuildContext context) {
-    final gateMapper = Map.from({
-      0: 'MAIN',
-      1: 'NORTH',
-      2: 'WEST',
-      3: 'TECHNO',
-      4: 'SOUTH',
-    });
-
-    final windowDirectionMapper = Map.from({
-      0: 'SOUTH',
-      1: 'EAST',
-      2: 'WEST',
-      3: 'NORTH',
-    });
-
-    final houseRegState = ref.watch(houseRegProvider);
-    final token = ref.watch(tokenProvider);
-    final gate = ref.watch(gateProvider);
-    final maintenceBill = ref.watch(maintenceBillProvider);
-    final windowDirection = ref.watch(windowDirectionProvider);
-    final roomCnt = ref.watch(roomCntProvider);
-    final roomFloor = ref.watch(roomFloorProvider);
-    final monthlyFee = ref.watch(monthlyFeeProvider);
-    final deposit = ref.watch(depositValueProvider);
-    final moveInDate = ref.watch(moveInDateProvider);
-    final moveOutDate = ref.watch(moveOutDateProvider);
-    final isAgree = ref.watch(isAgreeProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,

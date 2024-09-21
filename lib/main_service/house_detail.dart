@@ -23,18 +23,19 @@
 //   Widget build(BuildContext context) {
 //     return Scaffold(
 //       backgroundColor: Colors.white,
-//       appBar: AppBar(
-//         backgroundColor: Colors.white,
-//         title: Text(
-//           '글쓰기',
-//           style: TextStyle(fontWeight: FontWeight.bold),
-//         ),
-//       ),
 //       body: Center(
 //         child: SingleChildScrollView(
 //           child: Column(
 //             children: [
+//               Text('사용자 프로필'),
+//               Text('글 제목'),
 //               CustomDivider(context: context, indent: 0.04, thickness: 0.002),
+//               Text('사진 좌우 스클롤 위젯'),
+//               Text('detailInfo'),
+//               Text('건물명'),
+//               Text('주소'),
+//
+//
 //               UserTextInputBox(hintText: ' 제목을 입력하세요', ),
 //               UserTextInputBox(
 //                   hintText:
