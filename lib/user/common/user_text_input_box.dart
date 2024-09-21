@@ -9,10 +9,12 @@ import 'package:knu_homes/project_common/reactSize.dart';
 
 class UserTextInputBox extends ConsumerStatefulWidget {
   final String hintText;
+  final TextEditingController controller;
   final bool isNeedLong;
 
-  const UserTextInputBox({
+  UserTextInputBox({
     required this.hintText,
+    required this.controller,
     this.isNeedLong = false,
     Key? key,
   }) : super(key: key);
@@ -40,6 +42,7 @@ class _UserTextInputBoxState extends ConsumerState<UserTextInputBox> {
         child: TextFormField(
           cursorColor: Colors.black,
           maxLines: widget.isNeedLong ? null : 1, // 길게 입력할 때 제한 없음
+          controller: widget.controller,
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,

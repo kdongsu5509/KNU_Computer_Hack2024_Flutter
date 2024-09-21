@@ -1,16 +1,21 @@
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:knu_homes/project_common/filter/filter_single_slider_tile.dart';
 import 'package:knu_homes/project_common/reactSize.dart';
-import 'package:knu_homes/riverpod_provider/filter_provider.dart';
 import 'package:knu_homes/user/common/user_login_register_button.dart';
 import 'package:knu_homes/user/common/user_text_input_box.dart';
 import '../project_common/customDivider.dart';
 import '../project_common/filter/filter_calendar_tile.dart';
 import '../project_common/filter/filter_tile.dart';
 import '../project_common/filter/filter_title.dart';
+import '../request/my_request.dart';
+import '../riverpod_provider/filter_provider.dart';
+import '../riverpod_provider/house_reg_provider.dart';
+import '../riverpod_provider/user_info_provider.dart';
 
 class HouseReg extends ConsumerStatefulWidget {
   const HouseReg({super.key});
@@ -20,11 +25,57 @@ class HouseReg extends ConsumerStatefulWidget {
 }
 
 class _HouseRegState extends ConsumerState<HouseReg> {
-  List<File> _imageList = [];
+  TextEditingController titleController = TextEditingController();
+  TextEditingController detailInfoController = TextEditingController();
+  TextEditingController buildingNameController = TextEditingController();
+  TextEditingController buildingAddressController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Provider의 초기값 설정
+    titleController.addListener(() {
+      ref.read(houseRegProvider.notifier).updateTitle(titleController.text);
+    });
+    detailInfoController.addListener(() {
+      ref.read(houseRegProvider.notifier).updateDetailInfo(detailInfoController.text);
+    });
+    buildingNameController.addListener(() {
+      ref.read(houseRegProvider.notifier).updateBuildingName(buildingNameController.text);
+    });
+    buildingAddressController.addListener(() {
+      ref.read(houseRegProvider.notifier).updateBuildingAddress(buildingAddressController.text);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final gateMapper = Map.from({
+      0: 'MAIN',
+      1: 'NORTH',
+      2: 'WEST',
+      3: 'TECHNO',
+      4: 'SOUTH',
+    });
 
+    final windowDirectionMapper = Map.from({
+      0: 'SOUTH',
+      1: 'EAST',
+      2: 'WEST',
+      3: 'NORTH',
+    });
+
+    final houseRegState = ref.watch(houseRegProvider);
+    final token = ref.watch(tokenProvider);
+    final gate = ref.watch(gateProvider);
+    final maintenceBill = ref.watch(maintenceBillProvider);
+    final windowDirection = ref.watch(windowDirectionProvider);
+    final roomCnt = ref.watch(roomCntProvider);
+    final roomFloor = ref.watch(roomFloorProvider);
+    final monthlyFee = ref.watch(monthlyFeeProvider);
+    final deposit = ref.watch(depositValueProvider);
+    final moveInDate = ref.watch(moveInDateProvider);
+    final moveOutDate = ref.watch(moveOutDateProvider);
     final isAgree = ref.watch(isAgreeProvider);
 
     return Scaffold(
@@ -41,13 +92,23 @@ class _HouseRegState extends ConsumerState<HouseReg> {
           child: Column(
             children: [
               CustomDivider(context: context, indent: 0.04, thickness: 0.002),
-              UserTextInputBox(hintText: ' 제목을 입력하세요'),
               UserTextInputBox(
-                  hintText:
-                      ' 홈즈에 올릴 게시글 내용을 작성해주세요.\n 신뢰할 수 있는 거래를 위해 자세히 적어주세요\n',
-                  isNeedLong: true),
-              UserTextInputBox(hintText: ' 매물 이름을 입력하세요'),
-              UserTextInputBox(hintText: ' 매물 주소를 입력하세요'),
+                hintText: ' 제목을 입력하세요',
+                controller: titleController,
+              ),
+              UserTextInputBox(
+                hintText: ' 홈즈에 올릴 게시글 내용을 작성해주세요.\n 신뢰할 수 있는 거래를 위해 자세히 적어주세요\n',
+                isNeedLong: true,
+                controller: detailInfoController,
+              ),
+              UserTextInputBox(
+                hintText: ' 매물 이름을 입력하세요',
+                controller: buildingNameController,
+              ),
+              UserTextInputBox(
+                hintText: ' 매물 주소를 입력하세요',
+                controller: buildingAddressController,
+              ),
               // 이미지 선택 부분
               Container(
                 height: MediaQuery.of(context).size.width * 0.32,
@@ -57,19 +118,17 @@ class _HouseRegState extends ConsumerState<HouseReg> {
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
                   ),
-                  itemCount: _imageList.length + 1, // 이미지 리스트의 길이 + 추가 버튼
+                  itemCount: houseRegState.imageList.length + 1,
                   itemBuilder: (context, index) {
-                    if (index < _imageList.length) {
+                    if (index < houseRegState.imageList.length) {
                       return Padding(
-                        padding: EdgeInsets.all(
-                          myFWidth(context, 0.04),
-                        ),
+                        padding: EdgeInsets.all(myFWidth(context, 0.04)),
                         child: Container(
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.black),
                             borderRadius: BorderRadius.circular(10),
                             image: DecorationImage(
-                              image: FileImage(_imageList[index]),
+                              image: FileImage(File(houseRegState.imageList[index].path)), // XFile을 File로 변환
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -77,11 +136,9 @@ class _HouseRegState extends ConsumerState<HouseReg> {
                       );
                     } else {
                       return GestureDetector(
-                        onTap: _pickImages, // 이미지 선택 함수 호출
+                        onTap: _pickImages,
                         child: Padding(
-                          padding: EdgeInsets.all(
-                            myFWidth(context, 0.04),
-                          ),
+                          padding: EdgeInsets.all(myFWidth(context, 0.04)),
                           child: Container(
                             decoration: BoxDecoration(
                               border: Border.all(color: Colors.black),
@@ -95,7 +152,6 @@ class _HouseRegState extends ConsumerState<HouseReg> {
                   },
                 ),
               ),
-
               // 필터 및 기타 UI 요소
               FilterTile(
                 filterName: '문위치',
@@ -123,12 +179,8 @@ class _HouseRegState extends ConsumerState<HouseReg> {
                 providerName: 'roomFloorProvider',
                 isDivide: true,
               ),
-              FiltersSingleSidertile(
-                filterName: '월세',
-              ),
-              FiltersSingleSidertile(
-                filterName: '보증금',
-              ),
+              FiltersSingleSidertile(filterName: '월세'),
+              FiltersSingleSidertile(filterName: '보증금'),
               FilterCalendarTile(filterName: '입주 가능 날짜'),
               FilterCalendarTile(filterName: '계약 만료 날짜'),
               Row(
@@ -136,23 +188,35 @@ class _HouseRegState extends ConsumerState<HouseReg> {
                   Checkbox(
                     activeColor: Colors.black,
                     checkColor: Colors.white,
-                    value: isAgree,
+                    value: houseRegState.isAgree,
                     onChanged: (bool? newValue) {
                       if (newValue != null) {
-                        // 새로운 상태를 반환하는 함수 형태로 전달
-                        ref
-                            .read(isAgreeProvider.notifier)
-                            .update((state) => newValue);
-                        print(
-                            'finishContainValue: ${!isAgree}'); // 선택 시 false, 선택 해제 시 true
+                        ref.read(houseRegProvider.notifier).updateIsAgree(newValue);
                       }
                     },
                   ),
-                  FilterTitle(filterName: '이 모든 항목은 서류상 집주인과 합의되었으며\n이후 발생하는 모든 문제는 홈즈에서 책임지지 \n않음을 동의합니다.', fontSize: 0.03),
+                  FilterTitle(
+                    filterName: '이 모든 항목은 서류상 집주인과 합의되었으며\n이후 발생하는 모든 문제는 홈즈에서 책임지지 \n않음을 동의합니다.',
+                    fontSize: 0.03,
+                  ),
                 ],
               ),
               SizedBox(height: myFWidth(context, 0.04)),
-              UserLoginRegisterButton(buttonText: '등록하기', onPressed: (){}),
+              UserLoginRegisterButton(
+                buttonText: '등록하기',
+                onPressed: () => postHouseDetail(
+                  houseRegState,
+                  gateMapper[gate],
+                  windowDirectionMapper[windowDirection],
+                  true, // 임시로 true로 설정 -> 차후 값 변경 필요
+                  roomCnt!,
+                  roomFloor!,
+                  monthlyFee.toInt()!,
+                  deposit.toInt()!,
+                  moveInDate,
+                  moveOutDate,
+                ), // 람다 함수 사용
+              ),
               SizedBox(height: myFWidth(context, 0.04)),
             ],
           ),
@@ -161,16 +225,21 @@ class _HouseRegState extends ConsumerState<HouseReg> {
     );
   }
 
+  // Future<void> _pickImages() async {
+  //   final picker = ImagePicker();
+  //   final List<XFile>? pickedImages = await picker.pickMultiImage();
+  //   if (pickedImages != null) {
+  //     final newImages = pickedImages.map((pickedImage) => File(pickedImage.path)).toList();
+  //     ref.read(houseRegProvider.notifier).updateImageList(newImages);
+  //   }
+  // }
   Future<void> _pickImages() async {
     final picker = ImagePicker();
-    final List<XFile>? pickedImages =
-        await picker.pickMultiImage(); // 다중 이미지 선택
-    if (pickedImages != null) {
-      setState(() {
-        _imageList = pickedImages
-            .map((pickedImage) => File(pickedImage.path))
-            .toList(); // 선택한 이미지 리스트로 변환
-      });
+    final List<XFile>? imageFiles = await picker.pickMultiImage();
+
+    if (imageFiles != null) {
+      // final newImages = multipartFiles.map((pickedImage) => File(pickedImage.path)).toList();
+      ref.read(houseRegProvider.notifier).updateImageList(imageFiles);
     }
   }
 }
