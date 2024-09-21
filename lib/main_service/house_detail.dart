@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:knu_homes/main_service/chatting/chatting_list_detail.dart';
+import 'package:knu_homes/project_common/reactSize.dart';
 
 import '../project_common/customDivider.dart';
 import '../request/houser_list_request.dart';
@@ -21,7 +23,7 @@ class HouseDetail extends ConsumerStatefulWidget {
 class _HouseRegState extends ConsumerState<HouseDetail> {
   List<File> _imageList = [];
 
-  Future<List<Map<String, dynamic>>> _fetchHouseDetail() async {
+  Future<Map<String, dynamic>> _fetchHouseDetail() async {
     return await HouseDetailRequest(id: widget.houseId);
   }
 
@@ -31,7 +33,7 @@ class _HouseRegState extends ConsumerState<HouseDetail> {
       backgroundColor: Colors.white,
       body: Center(
         child: SingleChildScrollView(
-          child: FutureBuilder<List<Map<String, dynamic>>>(
+          child: FutureBuilder<Map<String, dynamic>>(
             future: _fetchHouseDetail(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -43,13 +45,32 @@ class _HouseRegState extends ConsumerState<HouseDetail> {
               } else if (snapshot.hasData) {
                 // 데이터를 성공적으로 불러온 경우
                 final detailInfo = snapshot.data!;
-                print(detailInfo);
+
                 return Column(
                   children: [
-                    Text('사용자 프로필'),
-                    Text('글 제목: ${detailInfo[0]['title'] ?? ''}'), // 글 제목
-                    CustomDivider(context: context, indent: 0.04, thickness: 0.002),
-                    Text('사진 좌우 스크롤 위젯'),
+                    Text(detailInfo['nickname']),
+                    Text(detailInfo['createdAt']),
+                    Text(detailInfo['title']), // 글 제목
+                    CustomDivider(
+                        context: context, indent: 0.04, thickness: 0.002),
+                    // _imageListWidget(detailInfo['images']), // 이미지 리스트
+                    // Image.network(detailInfo['images'][0]),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children:
+                            List<Widget>.from(detailInfo['images'].map((url) {
+                          return Image.network(url,
+                              width: myFWidth(context, 0.5));
+                        }).toList()),
+                      ),
+                    ),
+                    // Column(
+                    //   children: detailInfo['images'].map((url) {
+                    //     print(url);
+                    //     return Image.network(url) ;
+                    //   }).toList(),
+                    // ),
                     SizedBox(
                       height: 200,
                       child: ListView.builder(
@@ -60,8 +81,16 @@ class _HouseRegState extends ConsumerState<HouseDetail> {
                         },
                       ),
                     ),
-                    Text('건물명: ${detailInfo[0]['buildingName'] ?? ''}'), // 건물명
-                    Text('주소: ${detailInfo[0]['address'] ?? ''}'), // 주소
+                    Text('주소: ${detailInfo['address'] ?? ''}'), // 주소
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    ChattingListDetail()));
+                      },
+                      child: Text('채팅하기'),
+                    )
                   ],
                 );
               } else {
@@ -75,10 +104,26 @@ class _HouseRegState extends ConsumerState<HouseDetail> {
     );
   }
 
+  Widget _imageListWidget(
+    List<String> _imageList,
+  ) {
+    List<Image> imageList = [];
+
+    _imageList.forEach((url) {
+      imageList.add(
+        Image.network(url),
+      );
+    });
+
+    return Column(
+      children: imageList,
+    );
+  }
+
   Future<void> _pickImages() async {
     final picker = ImagePicker();
     final List<XFile>? pickedImages =
-    await picker.pickMultiImage(); // 다중 이미지 선택
+        await picker.pickMultiImage(); // 다중 이미지 선택
     if (pickedImages != null) {
       setState(() {
         _imageList = pickedImages

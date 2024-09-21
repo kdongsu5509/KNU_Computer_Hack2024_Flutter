@@ -1,52 +1,59 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 
 final dio = Dio();
 
 final baseUrl = 'http://kkym.duckdns.org:8080';
 
-
 Future<List<Map<String, dynamic>>> HouseListRequest() async {
-  try{
+  try {
     final resp = await dio.get(
-      baseUrl+'/api/items',
+      baseUrl + '/api/items',
     );
     print("resp.data: ${resp.data}");
 
     // print("runtimeType :  ${houseList.runtimeType}");
-    final data = resp.data.map((data) => {
-      'id': data['id'],
-      'createdAt': data['createdAt'],
-      'title': data['title'],
-      'content': data['content'],
-      'thumbnail': data['thumbnail'],
-      'moveInDate': data['moveInDate'],
-      'isSold': data['isSold'],
-    }).map((data) => Map<String, dynamic>.from(data)).cast<Map<String, dynamic>>().toList();
+    final data = resp.data
+        .map((data) => {
+              'id': data['id'],
+              'createdAt': data['createdAt'],
+              'title': data['title'],
+              'content': data['content'],
+              'thumbnail': data['thumbnail'],
+              'moveInDate': data['moveInDate'],
+              'isSold': data['isSold'],
+            })
+        .map((data) => Map<String, dynamic>.from(data))
+        .cast<Map<String, dynamic>>()
+        .toList();
 
     print(data);
     return data;
-
-  }on DioException catch(e){
+  } on DioException catch (e) {
     print(e.message);
     return [];
   }
-
 }
 
-Future<List<Map<String, dynamic>>> HouseDetailRequest({
+Future<Map<String, dynamic>> HouseDetailRequest({
   required int id,
 }) async {
-  try{
+  try {
     final resp = await dio.get(
-      baseUrl+'/api/items/${id}',
+      baseUrl + '/api/items/${id}',
     );
-    print("resp.data: ${resp.data}");
+    final imageResp = await dio.get(
+      baseUrl + '/api/items/${id}/images',
+    );
 
-    // print("runtimeType :  ${houseList.runtimeType}");
-    final data = resp.data.map((data) => {
+    final data = resp.data;
+    final imageList = imageResp.data;
+    print(List<String>.from(imageList['images']));
+    return {
       'id': data['id'],
       'createdAt': data['createdAt'],
-      'images' : data['images'],
+      'images' : List<String>.from(imageList['images']),
       'title': data['title'],
       'content': data['content'],
       'address': data['address'],
@@ -63,14 +70,9 @@ Future<List<Map<String, dynamic>>> HouseDetailRequest({
       'userId': data['userId'],
       'userImage': data['userImage'],
       'nickname': data['nickname'],
-    }).map((data) => Map<String, dynamic>.from(data)).cast<Map<String, dynamic>>().toList();
-
-    print(data);
-    return data;
-
-  }on DioException catch(e){
+    };
+  } on DioException catch (e) {
     print(e.message);
-    return [];
+    return {};
   }
-
 }
