@@ -1,8 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:knu_homes/project_common/reactSize.dart';
+import 'package:knu_homes/request/houser_list_request.dart';
 import '../const/MyColor.dart';
+import '../main_service/house_detail.dart';
 
-Widget houseSummarizeTile(BuildContext context, bool isPaddingNeed) {
+Widget houseSummarizeTile(BuildContext context, bool isPaddingNeed, Map<String, dynamic> snapshot) {
   if (isPaddingNeed)
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -26,7 +29,7 @@ Widget houseSummarizeTile(BuildContext context, bool isPaddingNeed) {
                 padding: EdgeInsets.symmetric(
                     horizontal: myFWidth(context, 0.03)),
                 child: Image.network(
-                  "https://i.namu.wiki/i/N77FArM9VORgT4IeZTW1kBYdLlDoWrd5kllCwnusok9tQkV7cBD3b-oQkWr95jNnMFxu0s8yMhtBFUGpjqKzbw.webp",
+                  snapshot['thumbnail'],
                   width: myFWidth(context, 0.15),
                   height: myFHeight(context, 0.15),
                   errorBuilder: (context, error, stackTrace) {
@@ -40,7 +43,7 @@ Widget houseSummarizeTile(BuildContext context, bool isPaddingNeed) {
                   children: [
                     Text(
                       //아래 텍스트 길이 만큼 잘라서 표시하자.
-                      '정문 이어살기 구합니다(나가는\n입장)200/35 월세 5만원 지원...',
+                      snapshot['title'],
                       style: TextStyle(
                         fontSize: myFWidth(context, 0.042),
                         fontWeight: FontWeight.w500,
@@ -48,7 +51,7 @@ Widget houseSummarizeTile(BuildContext context, bool isPaddingNeed) {
                     ),
                     Text(
                       //아래 텍스트 길이 만큼 잘라서 표시하자.
-                      '개인적으로 첫달 월세 5만원 지원해...',
+                      snapshot['content'],
                       style: TextStyle(
                         fontSize: myFWidth(context, 0.035),
                       ),
@@ -60,52 +63,66 @@ Widget houseSummarizeTile(BuildContext context, bool isPaddingNeed) {
           )),
     );
   else
-    return Container(
-        width: myFWidth(context, 0.2),
-        decoration: BoxDecoration(
-          color: MY_GREY,
-          borderRadius: BorderRadius.circular(myFWidth(context, 0.03)),
-          border: Border.all(
-            color: Colors.black,
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => HouseDetail(
+              houseId: snapshot['id'],
+            ),
           ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: myFWidth(context, 0.03)),
-              child: Image.network(
-                "https://i.namu.wiki/i/N77FArM9VORgT4IeZTW1kBYdLlDoWrd5kllCwnusok9tQkV7cBD3b-oQkWr95jNnMFxu0s8yMhtBFUGpjqKzbw.webp",
-                width: myFWidth(context, 0.15),
-                height: myFHeight(context, 0.15),
-                errorBuilder: (context, error, stackTrace) {
-                  return const Text('이미지를 로드할 수 없습니다.');
-                },
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+            width: myFWidth(context, 0.2),
+            decoration: BoxDecoration(
+              color: MY_GREY,
+              borderRadius: BorderRadius.circular(myFWidth(context, 0.03)),
+              border: Border.all(
+                color: Colors.black,
               ),
             ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    //아래 텍스트 길이 만큼 잘라서 표시하자.
-                    '정문 이어살기 구합니다(나가는\n입장)200/35 월세 5만원 지원...',
-                    style: TextStyle(
-                      fontSize: myFWidth(context, 0.042),
-                      fontWeight: FontWeight.w500,
-                    ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: myFWidth(context, 0.03)),
+                  child: Image.network(
+                    snapshot['thumbnail'] ?? "https://2024-hackathon-homes.s3.ap-northeast-2.amazonaws.com/item/default.png",
+                    width: myFWidth(context, 0.15),
+                    height: myFHeight(context, 0.15),
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Text('이미지를 로드할 수 없습니다.');
+                    },
                   ),
-                  Text(
-                    //아래 텍스트 길이 만큼 잘라서 표시하자.
-                    '개인적으로 첫달 월세 5만원 지원해...',
-                    style: TextStyle(
-                      fontSize: myFWidth(context, 0.035),
-                    ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        //아래 텍스트 길이 만큼 잘라서 표시하자.
+                        snapshot['title'],
+                        style: TextStyle(
+                          fontSize: myFWidth(context, 0.042),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        //아래 텍스트 길이 만큼 잘라서 표시하자.
+                        snapshot['content'],
+                        style: TextStyle(
+                          fontSize: myFWidth(context, 0.035),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            )
-          ],
-        ));
+                )
+              ],
+            )),
+      ),
+    );
 }

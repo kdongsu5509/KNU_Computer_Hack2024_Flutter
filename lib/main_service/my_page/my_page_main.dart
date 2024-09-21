@@ -121,7 +121,10 @@ Widget _MySell(
       ),
       CustomDivider(context: context, indent: 0.0, thickness: 0.002),
       SizedBox(height: myFWidth(context, 0.05)),
-      houseSummarizeTile(context, false),
+      houseSummarizeTile(context, false, {
+        'title': '아파트 이름',
+        'content': '아파트 내용',
+      }),
     ],
   );
 }

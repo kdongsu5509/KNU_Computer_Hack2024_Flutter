@@ -6,6 +6,7 @@ import 'package:knu_homes/main_service/my_page/my_page_main.dart';
 import 'package:knu_homes/project_common/reactSize.dart';
 import 'package:knu_homes/project_common/selector_bean/selectorBean_justshow.dart';
 import '../project_common/house_summarize_tile.dart';
+import '../request/houser_list_request.dart';
 import '../riverpod_provider/filter_provider.dart';
 import 'house_list_component/my_drawer.dart';
 
@@ -17,6 +18,14 @@ class HouseList extends ConsumerStatefulWidget {
 }
 
 class _HouseListState extends ConsumerState<HouseList> {
+  late Future<List<Map<String, dynamic>>> houseList;
+
+  @override
+  void initState() {
+    super.initState();
+    houseList = HouseListRequest();
+  }
+
   @override
   Widget build(BuildContext context) {
     final gateValue = ref.watch(gateProvider);
@@ -38,93 +47,109 @@ class _HouseListState extends ConsumerState<HouseList> {
         depositEndValue: depositEndValue,
         moveInDateValue: moveInDateValue);
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: _myAppBar(context), // 커스텀 AppBar
-      drawer: MyDrawer(context: context), // 커스텀 Drawer
-      body: Stack(
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SizedBox(
-                height: myFWidth(context, 0.025),
-              ),
-              _pageTop(context: context),
-              _myDivider(context),
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: NeverScrollableScrollPhysics(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      (isFilterApplied)
-                          ? Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          myFWidth(context, 0.06),
-                          myFWidth(context, 0.03),
-                          myFWidth(context, 0.06),
-                          0,
-                        ),
+    return FutureBuilder(
+      future: houseList,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            appBar: _myAppBar(context), // 커스텀 AppBar
+            drawer: MyDrawer(context: context), // 커스텀 Drawer
+            body: Stack(
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(
+                      height: myFWidth(context, 0.025),
+                    ),
+                    _pageTop(context: context),
+                    _myDivider(context),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (context, index) {
+                          return houseSummarizeTile(context, false, snapshot.data![index]);
+                        },
+                        // physics: NeverScrollableScrollPhysics(),
+                        // child: Column(
+                        //   crossAxisAlignment: CrossAxisAlignment.stretch,
+                        //   children: [
+                        //     (isFilterApplied)
+                        //         ? Padding(
+                        //       padding: EdgeInsets.fromLTRB(
+                        //         myFWidth(context, 0.06),
+                        //         myFWidth(context, 0.03),
+                        //         myFWidth(context, 0.06),
+                        //         0,
+                        //       ),
+                        //       child: Container(
+                        //         decoration: BoxDecoration(
+                        //           color: MY_DARK_GREY,
+                        //           borderRadius: BorderRadius.circular(
+                        //               myFHeight(context, 0.03)),
+                        //         ),
+                        //         child: _showCheckedOption(
+                        //             context: context,
+                        //             gateValue: gateValue,
+                        //             maintenBillValue: maintenBillValue,
+                        //             windowValue: windowValue,
+                        //             roomCntValue: roomCntValue,
+                        //             roomFloorValue: roomFloorValue,
+                        //             monthlyFeeStartValue: monthlyFeeStartValue,
+                        //             monthlyFeeEndValue: monthlyFeeEndValue,
+                        //             depositStartValue: depositStartValue,
+                        //             depositEndValue: depositEndValue,
+                        //             moveInDateValue: moveInDateValue),
+                        //       ),
+                        //     )
+                        //         : SizedBox(height: 0),
+                        //     houseSummarizeTile(context, true),
+                        //     // 목록 내용
+                        //     SizedBox(height: myFHeight(context, 0.1)),
+                        //     // 아래에 공간을 확보하여 "더보기" 버튼과 겹치지 않도록 함
+                        //   ],
+                        // ),
+                      ),
+                    ),
+                  ],
+                ),
+                Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Padding(
+                      padding: EdgeInsets.all(myFWidth(context, 0.03)),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    HouseReg()), // UsrLogin으로 이동
+                          );
+                        },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: MY_DARK_GREY,
-                            borderRadius: BorderRadius.circular(
-                                myFHeight(context, 0.03)),
+                            color: MY_BLUE,
+                            borderRadius:
+                                BorderRadius.circular(myFHeight(context, 0.03)),
                           ),
-                          child: _showCheckedOption(
-                              context: context,
-                              gateValue: gateValue,
-                              maintenBillValue: maintenBillValue,
-                              windowValue: windowValue,
-                              roomCntValue: roomCntValue,
-                              roomFloorValue: roomFloorValue,
-                              monthlyFeeStartValue: monthlyFeeStartValue,
-                              monthlyFeeEndValue: monthlyFeeEndValue,
-                              depositStartValue: depositStartValue,
-                              depositEndValue: depositEndValue,
-                              moveInDateValue: moveInDateValue),
+                          child: Icon(
+                            Icons.add_circle_outline_rounded,
+                            color: Colors.white,
+                            size: myFHeight(context, 0.05),
+                          ),
                         ),
-                      )
-                          : SizedBox(height: 0),
-                      houseSummarizeTile(context, true),
-                      // 목록 내용
-                      SizedBox(height: myFHeight(context, 0.1)),
-                      // 아래에 공간을 확보하여 "더보기" 버튼과 겹치지 않도록 함
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Positioned(
-              bottom: 0,
-              right: 0,
-              child: Padding(
-                padding: EdgeInsets.all(myFWidth(context, 0.03)),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => HouseReg()), // UsrLogin으로 이동
-                    );
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: MY_BLUE,
-                      borderRadius:
-                      BorderRadius.circular(myFHeight(context, 0.03)),
-                    ),
-                    child: Icon(
-                      Icons.add_circle_outline_rounded,
-                      color: Colors.white,
-                      size: myFHeight(context, 0.05),
-                    ),
-                  ),
-                ),
-              )),
-        ],
-      ),
+                      ),
+                    )),
+              ],
+            ),
+          );
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        }
+        return const CircularProgressIndicator();
+      },
     );
   }
 }
@@ -132,10 +157,10 @@ class _HouseListState extends ConsumerState<HouseList> {
 bool checkOptionValue(int? gateValue, int? maintenBillValue, int? windowValue,
     int? roomCntValue, int? roomFloorValue,
     {required double monthlyFeeStartValue,
-      required double monthlyFeeEndValue,
-      required double depositStartValue,
-      required double depositEndValue,
-      required String moveInDateValue}) {
+    required double monthlyFeeEndValue,
+    required double depositStartValue,
+    required double depositEndValue,
+    required String moveInDateValue}) {
   if (gateValue != null &&
       maintenBillValue != null &&
       windowValue != null &&
@@ -152,21 +177,17 @@ bool checkOptionValue(int? gateValue, int? maintenBillValue, int? windowValue,
 }
 
 PreferredSizeWidget? _myAppBar(BuildContext context) {
-  double iconSize = MediaQuery
-      .of(context)
-      .size
-      .height * 0.04;
+  double iconSize = MediaQuery.of(context).size.height * 0.04;
   return AppBar(
     backgroundColor: Colors.white,
     leading: Builder(
       // Builder로 새로운 context 생성
-      builder: (context) =>
-          IconButton(
-            icon: Icon(Icons.menu, size: iconSize),
-            onPressed: () {
-              Scaffold.of(context).openDrawer(); // Drawer 열기
-            },
-          ),
+      builder: (context) => IconButton(
+        icon: Icon(Icons.menu, size: iconSize),
+        onPressed: () {
+          Scaffold.of(context).openDrawer(); // Drawer 열기
+        },
+      ),
     ),
     title: Row(
       children: [
@@ -176,9 +197,11 @@ PreferredSizeWidget? _myAppBar(BuildContext context) {
         GestureDetector(
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => MyPageMain()), // UsrLogin으로 이동
+                MaterialPageRoute(
+                    builder: (context) => MyPageMain()), // UsrLogin으로 이동
               );
-            }, child: Icon(Icons.person_2_outlined, size: iconSize)),
+            },
+            child: Icon(Icons.person_2_outlined, size: iconSize)),
       ],
     ),
   );
@@ -330,16 +353,16 @@ Widget _showCheckedOption({
   }
   if (monthlyFeeStartValue != 0 || monthlyFeeEndValue != 100) {
     appliedFilters.add(SelectorBeanJustShow(
-        selectorName: '월세: ${monthlyFeeStartValue
-            .toInt()} ~ ${monthlyFeeEndValue.toInt()}',
+        selectorName:
+            '월세: ${monthlyFeeStartValue.toInt()} ~ ${monthlyFeeEndValue.toInt()}',
         provider: monthlyFeeStartValueProvider,
         type: 1,
         provider2: monthlyFeeEndValueProvider));
   }
   if (depositStartValue != 0 || depositEndValue != 1000) {
     appliedFilters.add(SelectorBeanJustShow(
-        selectorName: '보증금: ${depositStartValue.toInt()} ~ ${depositEndValue
-            .toInt()}',
+        selectorName:
+            '보증금: ${depositStartValue.toInt()} ~ ${depositEndValue.toInt()}',
         provider: depositStartValueProvider,
         type: 2,
         provider2: depositEndValueProvider));
