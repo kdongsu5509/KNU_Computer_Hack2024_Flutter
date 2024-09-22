@@ -10,6 +10,8 @@ class MyPageEditAndSecession extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController idController = TextEditingController();
+    final TextEditingController nameController = TextEditingController();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -37,8 +39,8 @@ class MyPageEditAndSecession extends StatelessWidget {
                 ),
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.08),
-              UserInfoInputBox(labelText: '이름', isPassword: true),
-              UserInfoInputBox(labelText: '아이디', isPassword: true),
+              UserInfoInputBox(labelText: '이름', controller: nameController, isPassword: true),
+              UserInfoInputBox(labelText: '아이디', controller: idController, isPassword: true),
               SizedBox(height: MediaQuery.of(context).size.height * 0.025),
               UserLoginRegisterButton(
                 buttonText: '다음',

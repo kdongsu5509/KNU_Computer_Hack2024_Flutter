@@ -6,16 +6,23 @@ import 'package:knu_homes/const/MyColor.dart';
  * 로그인 및 회원가입 페이지에서 사용
  */
 
-class UserInfoInputBox extends StatelessWidget {
+class UserInfoInputBox extends StatefulWidget {
   final String labelText;
   final bool isPassword;
+  final TextEditingController controller;
 
   const UserInfoInputBox({
     required this.labelText,
+    required this.controller,
     this.isPassword = false, // 기본값 false 설정
     Key? key,
   }) : super(key: key);
 
+  @override
+  State<UserInfoInputBox> createState() => _UserInfoInputBoxState();
+}
+
+class _UserInfoInputBoxState extends State<UserInfoInputBox> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -26,8 +33,9 @@ class UserInfoInputBox extends StatelessWidget {
         MediaQuery.of(context).size.width * 0.0,
       ),
       child: TextFormField(
+        controller: widget.controller,
         cursorColor: Colors.black,
-        obscureText: isPassword,
+        obscureText: widget.isPassword,
         decoration: InputDecoration(
           filled: true,
           // 필드 배경색 활성화
@@ -43,7 +51,7 @@ class UserInfoInputBox extends StatelessWidget {
                 BorderRadius.circular(MediaQuery.of(context).size.width * 0.07),
             borderSide: BorderSide(color: Colors.black),
           ),
-          hintText: labelText,
+          hintText: widget.labelText,
         ),
       ),
     );

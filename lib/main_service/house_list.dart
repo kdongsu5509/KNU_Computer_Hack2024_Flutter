@@ -72,45 +72,6 @@ class _HouseListState extends ConsumerState<HouseList> {
                         itemBuilder: (context, index) {
                           return houseSummarizeTile(context, false, snapshot.data![index]);
                         },
-                        // physics: NeverScrollableScrollPhysics(),
-                        // child: Column(
-                        //   crossAxisAlignment: CrossAxisAlignment.stretch,
-                        //   children: [
-                        //     (isFilterApplied)
-                        //         ? Padding(
-                        //       padding: EdgeInsets.fromLTRB(
-                        //         myFWidth(context, 0.06),
-                        //         myFWidth(context, 0.03),
-                        //         myFWidth(context, 0.06),
-                        //         0,
-                        //       ),
-                        //       child: Container(
-                        //         decoration: BoxDecoration(
-                        //           color: MY_DARK_GREY,
-                        //           borderRadius: BorderRadius.circular(
-                        //               myFHeight(context, 0.03)),
-                        //         ),
-                        //         child: _showCheckedOption(
-                        //             context: context,
-                        //             gateValue: gateValue,
-                        //             maintenBillValue: maintenBillValue,
-                        //             windowValue: windowValue,
-                        //             roomCntValue: roomCntValue,
-                        //             roomFloorValue: roomFloorValue,
-                        //             monthlyFeeStartValue: monthlyFeeStartValue,
-                        //             monthlyFeeEndValue: monthlyFeeEndValue,
-                        //             depositStartValue: depositStartValue,
-                        //             depositEndValue: depositEndValue,
-                        //             moveInDateValue: moveInDateValue),
-                        //       ),
-                        //     )
-                        //         : SizedBox(height: 0),
-                        //     houseSummarizeTile(context, true),
-                        //     // 목록 내용
-                        //     SizedBox(height: myFHeight(context, 0.1)),
-                        //     // 아래에 공간을 확보하여 "더보기" 버튼과 겹치지 않도록 함
-                        //   ],
-                        // ),
                       ),
                     ),
                   ],
@@ -225,7 +186,7 @@ Widget _pageTop({
       height: myFHeight(context, 0.15),
       child: Center(
         child: Text(
-          'username님에게 \n 딱 맞는 집을 찾아보세요!',
+          '당신에게 \n 딱 맞는 집을 찾아보세요!',
           style: TextStyle(
             fontSize: myFWidth(context, 0.06),
             fontWeight: FontWeight.w500,
@@ -240,50 +201,12 @@ Widget _pageTop({
 Widget _myDivider(BuildContext context) {
   return Padding(
     padding: EdgeInsets.symmetric(
-      horizontal: myFWidth(context, 0.06),
+      horizontal: myFWidth(context, 0.03),
     ),
-    child: Row(
-      children: [
-        Expanded(
-          child: Divider(
-            color: Colors.black,
-            thickness: myFHeight(context, 0.0035),
-            endIndent: myFWidth(context, 0.03),
-          ),
-        ),
-        SizedBox(width: myFWidth(context, 0.02)), // 간격 추가
-        Container(
-          decoration: BoxDecoration(
-            color: MY_GREY,
-            borderRadius: BorderRadius.circular(myFHeight(context, 0.03)),
-          ),
-          width: myFWidth(context, 0.25), // 적절한 크기로 조정
-          height: myFHeight(context, 0.03),
-          child: DropdownButton<String>(
-            dropdownColor: MY_GREY,
-            // 드롭다운 메뉴의 배경색 설정
-            value: '최신순',
-            alignment: Alignment.center,
-            items: [
-              DropdownMenuItem(
-                value: '최신순',
-                child: Text('최신순'),
-              ),
-              DropdownMenuItem(
-                value: '순두부',
-                child: Text('순두부'),
-              ),
-              DropdownMenuItem(
-                value: '부대찌개',
-                child: Text('부대찌개'),
-              ),
-            ],
-            onChanged: (value) {
-              // 선택한 값 처리
-            },
-          ),
-        ),
-      ],
+    child: Divider(
+      color: Colors.black,
+      thickness: myFHeight(context, 0.0035),
+      endIndent: myFWidth(context, 0.015),
     ),
   );
 }

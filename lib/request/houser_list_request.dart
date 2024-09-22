@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 
-final dio = Dio();
+import '../a_server_info/server_url.dart';
 
-final baseUrl = 'http://kkym.duckdns.org:8080';
+final dio = Dio();
 
 Future<List<Map<String, dynamic>>> HouseListRequest() async {
   try {

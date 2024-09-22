@@ -1,79 +1,107 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:web_socket_channel/io.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-
+import 'package:stomp_dart_client/stomp_dart_client.dart';
+import '../../a_server_info/server_url.dart';
 import '../../riverpod_provider/user_info_provider.dart';
 
 class ChattingListDetail extends ConsumerStatefulWidget {
   final int chatRoomId;
+  final List<Map<String, dynamic>> messages = [];
 
-  const ChattingListDetail({required this.chatRoomId, super.key});
+  ChattingListDetail({required this.chatRoomId, super.key});
 
   @override
   ConsumerState<ChattingListDetail> createState() => _ChattingListDetailState();
 }
 
 class _ChattingListDetailState extends ConsumerState<ChattingListDetail> {
-  late final TextEditingController _textEditingController;
+  final TextEditingController _textEditingController = TextEditingController();
 
-  // WebSocket 웹소켓 채널을 선언
-  late final WebSocketChannel channel;
-
-  String baseUrl = 'http://kkym.duckdns.org:8080';
+  // StompClient -> WebSocket을 통해 서버와 통신할 수 있도록 해주는 객체
+  StompClient? stompClient;
   final dio = Dio();
+
+  void onConnect(StompFrame frame) {
+    stompClient!.subscribe(
+        destination: '/receive/chat/${widget.chatRoomId}',
+        callback: (StompFrame frame) {
+          print(frame.body);
+        });
+  }
 
   @override
   void initState() {
     super.initState();
     //2. 방 번호를 이용하여 채팅방의 내용 상세 조회
-    _getChatRoomDetail();
-
-    //3. 채팅방 상세 조회를 통해 채팅방 정보를 받아옴
-    //4. 채팅방 정보를 이용하여 채팅방 상세 화면을 구성
-    // 텍스트 입력 컨트롤러를 초기화
-    _textEditingController = TextEditingController();
-    //WebSocket 웹소켓 서버 연결
-    channel = IOWebSocketChannel.connect(
-        Uri.parse('ws://kkym.duckdns.org:8080/send/chat/${widget.chatRoomId}'));
+    if (stompClient == null) {
+      print("stompClient is null");
+      stompClient = StompClient(
+        config: StompConfig.sockJS(
+          url: "$baseUrl/ws",
+          onConnect: onConnect,
+          onWebSocketError: (dynamic error) => print(error.toString()),
+          webSocketConnectHeaders: {
+            'Authorization': 'Bearer $MY_TOKEN',
+          },
+          stompConnectHeaders: {
+            'Authorization': 'Bearer $MY_TOKEN',
+          }
+        ),
+      );
+      stompClient!.activate();
+    }
   }
 
-  Future<Map<String,dynamic>> _getChatRoomDetail() async {
+  //3. 채팅방 상세 조회를 통해 채팅방 정보를 받아옴
+  //4. 채팅방 정보를 이용하여 채팅방 상세 화면을 구성
+  // 텍스트 입력 컨트롤러를 초기화
+  //WebSocket 웹소켓 서버 연결
+
+  Future<Map<String, dynamic>> _getChatRoomDetail() async {
     final dio = Dio();
 
-    final resp = await dio.get(
-      '$baseUrl/api/chat/rooms/${widget.chatRoomId}',
+    final resp = await dio.get('$baseUrl/api/chat/rooms/${widget.chatRoomId}',
+        options: Options(headers: {
+          'Authorization': 'Bearer $MY_TOKEN',
+        }));
 
-      options: Options(
-        headers: {
-          'Authorization' : 'Bearer $MY_TOKEN',
-        }
-      )
-    );
-
-    final data= resp.data;
+    final data = resp.data;
     final result = {
-      'item' : Map<String, dynamic>.from(data['item']),
-      'messages': List<Map<String, dynamic>>.from(data['messages']),
+      'item': Map<String, dynamic>.from(data['item']),
+      // 'messages': List<Map<String, dynamic>>.from(data['messages']),
+      'messages': data['messages'].map((message) => {
+        'isMe': message['isMe'],
+        'content': message['content'],
+        'createdAt': List<int>.from(message['createdAt']).join('-').substring(0, 18),
+      })
     };
     print("result: $result");
     return result;
   }
 
   void _onPressed() {
-    // WebSocket 채널을 통해 메시지를 보내기
-    channel.sink.add(_textEditingController.text);
-    // 텍스트 필드를 초기화
-    _textEditingController.text = '';
+    final message = _textEditingController.text;
+    if (message.isNotEmpty) {
+      stompClient!.send(
+        destination: '/send/chat/${widget.chatRoomId}',
+        body: jsonEncode({
+          'content': message,
+        }),
+      );
+
+      _textEditingController.clear();
+    }
   }
 
   @override
   void dispose() {
     // 텍스트 입력 컨트롤러 해제
     _textEditingController.dispose();
+    stompClient!.deactivate();
     // WebSocket 채널 통신 닫기
-    channel.sink.close();
     super.dispose();
   }
 
@@ -81,7 +109,7 @@ class _ChattingListDetailState extends ConsumerState<ChattingListDetail> {
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: _getChatRoomDetail(),
-      builder: (context, snapshot){
+      builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
@@ -103,7 +131,8 @@ class _ChattingListDetailState extends ConsumerState<ChattingListDetail> {
               ),
               title: Text(
                 data!['item']['title'],
-                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                style:
+                    TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
               ),
               centerTitle: true,
               // 타이틀 가운데 정렬
@@ -141,9 +170,11 @@ class _ChattingListDetailState extends ConsumerState<ChattingListDetail> {
                   child: ListView(
                     children: List<Widget>.from(data['messages'].map((message) {
                       if (message['isMe']) {
-                        return _buildSentMessage(message!['content'], message['createdAt']);
+                        return _buildSentMessage(
+                            message!['content'], message['createdAt']);
                       } else {
-                        return _buildReceivedMessage(message!['content'], message['createdAt']);
+                        return _buildReceivedMessage(
+                            message!['content'], message['createdAt']);
                       }
                     }).toList()),
                   ),
@@ -154,12 +185,11 @@ class _ChattingListDetailState extends ConsumerState<ChattingListDetail> {
           );
         }
       },
-
     );
   }
 
   // 판매자가 보낸 메시지
-  Widget _buildReceivedMessage( String message, String time) {
+  Widget _buildReceivedMessage(String message, String time) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -225,6 +255,7 @@ class _ChattingListDetailState extends ConsumerState<ChattingListDetail> {
         children: [
           Expanded(
             child: TextField(
+              controller: _textEditingController,
               decoration: InputDecoration(
                 hintText: '메시지를 입력하세요...',
                 filled: true,

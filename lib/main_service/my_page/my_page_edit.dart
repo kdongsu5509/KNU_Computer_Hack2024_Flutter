@@ -11,6 +11,7 @@ class MyPageEdit extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController passwordController = TextEditingController();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -30,7 +31,7 @@ class MyPageEdit extends StatelessWidget {
               width: MediaQuery.of(context).size.width * 0.5,
             ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.08),
-            UserInfoInputBox(labelText: '비밀번호', isPassword: true),
+            UserInfoInputBox(labelText: '비밀번호', controller: passwordController, isPassword: true),
             SizedBox(height: MediaQuery.of(context).size.height * 0.2),
             UserLoginRegisterButton(
               buttonText: '다음',

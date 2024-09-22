@@ -30,19 +30,6 @@ class _MyDrawerState extends ConsumerState<MyDrawer> {
           GestureDetector(
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => MyPageMain()), // MyPage로 이동
-              );
-            },
-            child: _myDrawerTop(
-              context: context,
-              iconName: '마이페이지',
-              icon:
-                  Icon(Icons.person_2_outlined, size: myFHeight(context, 0.035)),
-            ),
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => ChattingList()), // MyPage로 이동
               );
             },

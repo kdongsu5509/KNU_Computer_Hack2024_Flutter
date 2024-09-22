@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:knu_homes/main_service/chatting/chatting_list_detail.dart';
 import 'package:knu_homes/project_common/reactSize.dart';
+import 'package:knu_homes/user/view/signup/usr_signup_a.dart';
+import 'package:knu_homes/user/view/usr_login.dart';
 
+import '../a_server_info/server_url.dart';
 import '../project_common/customDivider.dart';
 import '../request/houser_list_request.dart';
 import '../riverpod_provider/user_info_provider.dart';
@@ -86,21 +90,18 @@ class _HouseRegState extends ConsumerState<HouseDetail> {
                     Text('주소: ${detailInfo['address'] ?? ''}'), // 주소
                     TextButton(
                       onPressed: () async {
-                        try{
+                        try {
                           final dio = Dio();
                           late final chatRoomId;
 
-                          final resp = await dio.post(
-                            baseUrl + '/api/chat/rooms',
-                              data :{
-                                'itemId' : widget.houseId,
-                              },//채팅방 id 조회
-                              options: Options(
-                                  headers: {
-                                    'Authorization' : 'Bearer $MY_TOKEN',
-                                  }
-                              )
-                          );
+                          final resp =
+                              await dio.post(baseUrl + '/api/chat/rooms',
+                                  data: {
+                                    'itemId': widget.houseId,
+                                  }, //채팅방 id 조회
+                                  options: Options(headers: {
+                                    'Authorization': 'Bearer $MY_TOKEN',
+                                  }));
 
                           chatRoomId = resp.data['chatRoomId'].toInt(); //채팅방 id
 
@@ -111,9 +112,18 @@ class _HouseRegState extends ConsumerState<HouseDetail> {
                               ),
                             ),
                           );
-
                         } on DioException catch (e) {
-                          print('오류 발생: ${e.response}');
+                          print('오류 발생: ${e.response?.statusCode}');
+
+                          if (e.response!.statusCode == 401) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => UsrLogin()),
+                            );
+                          } else {
+                            print('오류 발생: ${e.response}');
+                          }
                         }
                       },
                       child: Text('채팅하기'),

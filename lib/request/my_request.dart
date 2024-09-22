@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'package:knu_homes/riverpod_provider/filter_provider.dart';
 import 'package:knu_homes/riverpod_provider/house_reg_provider.dart';
 
-final dio = Dio();
+import '../a_server_info/server_url.dart';
 
-final String baseUrl = 'http://kkym.duckdns.org:8080';
+final dio = Dio();
 
 void postHouseDetail(
   HouseRegState houseRegState,
@@ -25,6 +24,7 @@ void postHouseDetail(
     title: houseRegState.title,
     content: houseRegState.detailInfo,
     address: houseRegState.buildingAddress,
+    name : houseRegState.buildingName,
     deposit: deposit,
     rent: montlyFee,
     maintenanceFeeIncluded: maintenceFeeIncluded,
@@ -108,6 +108,7 @@ class ItemEnrollRequest {
   final String title;
   final String content;
   final String address;
+  final String name;
   final int deposit;
   final int rent;
   final bool maintenanceFeeIncluded;
@@ -123,6 +124,7 @@ class ItemEnrollRequest {
     required this.title,
     required this.content,
     required this.address,
+    required this.name,
     required this.deposit,
     required this.rent,
     required this.maintenanceFeeIncluded,
@@ -140,6 +142,7 @@ class ItemEnrollRequest {
       'title': title,
       'content': content,
       'address': address,
+      'name': name,
       'deposit': deposit,
       'rent': rent,
       'maintenanceFeeIncluded': maintenanceFeeIncluded,
@@ -159,6 +162,7 @@ class ItemEnrollRequest {
         'title': title,
         'content': content,
         'address': address,
+        'name': name,
         'deposit': deposit,
         'rent': rent,
         'maintenanceFeeIncluded': maintenanceFeeIncluded,

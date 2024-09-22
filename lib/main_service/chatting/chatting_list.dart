@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:knu_homes/project_common/reactSize.dart';
+import '../../a_server_info/server_url.dart';
 import '../../const/MyColor.dart';
 import '../../riverpod_provider/user_info_provider.dart';
 import 'chatting_list_detail.dart';
@@ -14,11 +15,10 @@ class ChattingList extends ConsumerStatefulWidget {
 }
 
 class _HouseRegState extends ConsumerState<ChattingList> {
-  String baseUrl = 'http://kkym.duckdns.org:8080';
 
   //토큰 넣어서 방 조회.
   Future<List<Map<String, dynamic>>> _getChatRoomList() async {
-    try{
+    try {
       final dio = Dio();
 
       final resp = await dio.get('$baseUrl/api/chat/rooms',
@@ -34,15 +34,16 @@ class _HouseRegState extends ConsumerState<ChattingList> {
         return {
           'chatRoomId': chatRoom['chatRoomId'],
           'title': chatRoom['title'],
-          'preview' : chatRoom['preview'],
-          'unreadCount' : chatRoom['unreadCount'],
-          'nickname' : chatRoom['nickname'],
-          'imageUrl' : chatRoom['imageUrl'],
+          'name': chatRoom['name'],
+          'preview': chatRoom['preview'],
+          'unreadCount': chatRoom['unreadCount'],
+          'nickname': chatRoom['nickname'],
+          'imageUrl': chatRoom['imageUrl'],
         };
       }).toList());
       print("result: ${result}");
       return result;
-    } on DioException catch(e) {
+    } on DioException catch (e) {
       print("error: $e");
       return [];
     }
@@ -55,7 +56,7 @@ class _HouseRegState extends ConsumerState<ChattingList> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
-        }else if (snapshot.hasError) {
+        } else if (snapshot.hasError) {
           return Center(child: Text(snapshot.error.toString()));
         } else {
           final data = snapshot.data;
@@ -74,13 +75,14 @@ class _HouseRegState extends ConsumerState<ChattingList> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: data!.map<Widget>((chatRoomListTile) {
+                  print(chatRoomListTile);
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ChattingListDetail(
-                            chatRoomId: chatRoomListTile!['id'],
+                            chatRoomId: chatRoomListTile!['chatRoomId'],
                           ),
                         ),
                       );
@@ -140,25 +142,31 @@ Widget chatSummarizeBox({
                         children: [
                           Row(
                             children: [
-                              (chatRoomListTile['unreadCount'] != 0) ? Container(
-                                decoration: BoxDecoration(
-                                  color: MY_ORANGE,
-                                  shape: BoxShape.circle,
-                                ),
-                                width: myFWidth(context, 0.09),
-                                child: Center(
-                                  child: Text(
-                                    chatRoomListTile['unreadCount'].toString(),
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: myFWidth(context, 0.035),
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ) : Container(),
+                              (chatRoomListTile['unreadCount'] != 0)
+                                  ? Container(
+                                      decoration: BoxDecoration(
+                                        color: MY_ORANGE,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      width: myFWidth(context, 0.09),
+                                      child: Center(
+                                        child: Text(
+                                          chatRoomListTile['unreadCount']
+                                              .toString(),
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: myFWidth(context, 0.035),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  : Container(),
                               Text(
-                                chatRoomListTile['nickname'].substring(0, 5),
+                                (chatRoomListTile['nickname'].length > 5)
+                                    ? chatRoomListTile['nickname']
+                                        .substring(0, 5)
+                                    : chatRoomListTile['nickname'],
                                 style: TextStyle(
                                   fontSize: myFWidth(context, 0.05),
                                   fontWeight: FontWeight.bold,
@@ -172,9 +180,9 @@ Widget chatSummarizeBox({
                                 ),
                               ),
                               Text(
-                                (chatRoomListTile['title'].length > 6)
-                                    ? chatRoomListTile['title'].substring(0, 6)
-                                    : chatRoomListTile['title'],
+                                (chatRoomListTile['name'].length > 6)
+                                    ? chatRoomListTile['name'].substring(0, 6)
+                                    : chatRoomListTile['name'],
                                 style: TextStyle(
                                   fontSize: myFWidth(context, 0.05),
                                   fontWeight: FontWeight.bold,
