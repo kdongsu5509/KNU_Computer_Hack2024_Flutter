@@ -91,9 +91,13 @@ class _ChattingListDetailState extends ConsumerState<ChattingListDetail> {
           'content': message,
         }),
       );
-
       _textEditingController.clear();
     }
+
+    _getChatRoomDetail();
+    setState(() {
+
+    });
   }
 
   @override
