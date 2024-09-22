@@ -18,12 +18,33 @@ class HouseList extends ConsumerStatefulWidget {
 }
 
 class _HouseListState extends ConsumerState<HouseList> {
+  final ScrollController _scrollController = ScrollController();
   late Future<List<Map<String, dynamic>>> houseList;
 
   @override
   void initState() {
     super.initState();
     houseList = HouseListRequest();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        // Load more items if needed
+        houseList = HouseListRequest();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _refreshData() async {
+    // 데이터 새로 고침 로직
+    setState(() {
+      houseList = HouseListRequest(); // 새로 고침 시 새로운 데이터 요청
+    });
   }
 
   @override
@@ -55,28 +76,32 @@ class _HouseListState extends ConsumerState<HouseList> {
             backgroundColor: Colors.white,
             appBar: _myAppBar(context), // 커스텀 AppBar
             drawer: MyDrawer(context: context), // 커스텀 Drawer
-            body: Stack(
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(
-                      height: myFWidth(context, 0.025),
-                    ),
-                    _pageTop(context: context),
-                    _myDivider(context),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          return houseSummarizeTile(context, false, snapshot.data![index]);
-                        },
+            body: RefreshIndicator(
+              onRefresh: _refreshData, // 리프레시 시 호출되는 메서드
+              child: Stack(
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(
+                        height: myFWidth(context, 0.025),
                       ),
-                    ),
-                  ],
-                ),
-                Positioned(
+                      _pageTop(context: context),
+                      _myDivider(context),
+                      Expanded(
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          physics: BouncingScrollPhysics(),
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            return houseSummarizeTile(context, false, snapshot.data![index]);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  Positioned(
                     bottom: 0,
                     right: 0,
                     child: Padding(
@@ -85,15 +110,14 @@ class _HouseListState extends ConsumerState<HouseList> {
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    HouseReg()), // UsrLogin으로 이동
+                                builder: (context) => HouseReg()), // HouseReg으로 이동
                           );
                         },
                         child: Container(
                           decoration: BoxDecoration(
                             color: MY_BLUE,
                             borderRadius:
-                                BorderRadius.circular(myFHeight(context, 0.03)),
+                            BorderRadius.circular(myFHeight(context, 0.03)),
                           ),
                           child: Icon(
                             Icons.add_circle_outline_rounded,
@@ -102,18 +126,24 @@ class _HouseListState extends ConsumerState<HouseList> {
                           ),
                         ),
                       ),
-                    )),
-              ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         }
-        return const CircularProgressIndicator();
+        return SizedBox(
+          width: myFWidth(context, 0.3),
+          child: Center(child: const CircularProgressIndicator()),
+        );
       },
     );
   }
 }
+
 
 bool checkOptionValue(int? gateValue, int? maintenBillValue, int? windowValue,
     int? roomCntValue, int? roomFloorValue,

@@ -1,9 +1,7 @@
 import 'dart:io';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:knu_homes/project_common/filter/filter_single_slider_tile.dart';
 import 'package:knu_homes/project_common/reactSize.dart';
 import 'package:knu_homes/user/common/user_login_register_button.dart';
@@ -204,20 +202,36 @@ class _HouseRegState extends ConsumerState<HouseReg> {
               SizedBox(height: myFWidth(context, 0.04)),
               UserLoginRegisterButton(
                 buttonText: '등록하기',
-                onPressed: () => postHouseDetail(
-                  houseRegState,
-                  gateMapper[gate],
-                  windowDirectionMapper[windowDirection],
-                  true, // 임시로 true로 설정 -> 차후 값 변경 필요
-                  roomCnt!,
-                  roomFloor!,
-                  monthlyFee.toInt()!,
-                  deposit.toInt()!,
-                  moveInDate,
-                  moveOutDate,
-                  context,
-                ), // 람다 함수 사용
+                onPressed: () {
+                  postHouseDetail(
+                    houseRegState,
+                    gateMapper[gate],
+                    windowDirectionMapper[windowDirection],
+                    true, // 임시로 true로 설정
+                    roomCnt!,
+                    roomFloor!,
+                    monthlyFee.toInt()!,
+                    deposit.toInt()!,
+                    moveInDate,
+                    moveOutDate,
+                    context,
+                  );
+
+                  // Provider 값 초기화
+                  ref.read(gateProvider.notifier).update((state) => null);
+                  ref.read(maintenceBillProvider.notifier).update((state) => null);
+                  ref.read(windowDirectionProvider.notifier).update((state) => null);
+                  ref.read(roomCntProvider.notifier).update((state) => null);
+                  ref.read(roomFloorProvider.notifier).update((state) => null);
+                  ref.read(monthlyFeeProvider.notifier).update((state) => 0.0);
+                  ref.read(depositValueProvider.notifier).update((state) => 0.0);
+                  ref.read(moveInDateProvider.notifier).update((state) => 'YYYY/MM/DD');
+                  ref.read(moveOutDateProvider.notifier).update((state) => 'YYYY/MM/DD');
+                  ref.read(isAgreeProvider.notifier).update((state) => false);
+                },
               ),
+
+
               SizedBox(height: myFWidth(context, 0.04)),
             ],
           ),

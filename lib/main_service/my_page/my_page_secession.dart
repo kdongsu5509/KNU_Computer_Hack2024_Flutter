@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:knu_homes/main_service/my_page/my_page_edit_and_secession.dart';
-
 import '../../project_common/customDivider.dart';
 import '../../project_common/page_title_box.dart';
-import '../../user/common/user_info_input_box.dart';
+import '../../riverpod_provider/user_info_provider.dart';
 import '../../user/common/user_login_register_button.dart';
 
 class MyPageSecession extends StatelessWidget {
@@ -31,12 +29,12 @@ class MyPageSecession extends StatelessWidget {
               width: MediaQuery.of(context).size.width * 0.5,
             ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.08),
-            UserInfoInputBox(labelText: '비밀번호', controller: passwordController, isPassword: true),
             SizedBox(height: MediaQuery.of(context).size.height * 0.1),
             UserLoginRegisterButton(
-              buttonText: '탈퇴하기',
+              buttonText: '로그아웃',
               onPressed: () {
-
+                MY_TOKEN = '';
+                Navigator.of(context).popUntil((route) => route.isFirst);
               },
               isSecession: true,
             ),
